@@ -107,6 +107,8 @@ const AppContent: React.FC = () => {
         setActiveView('next-rupee');
       } else if (hash.startsWith('cases') || hash.startsWith('portal')) {
         setActiveView(isOfficer ? 'citizen-mgmt' : 'report-issue');
+      } else if (hash.startsWith('verify')) {
+        setActiveView('verify');
       } else if (hash.startsWith('janmat')) {
         setActiveView('janmat');
       } else if (hash.startsWith('overview') || hash.startsWith('money-trail')) {
@@ -203,7 +205,7 @@ const AppContent: React.FC = () => {
           <CitizenLandingView
             currentWard={selectedWard}
             onNavigatePassport={handleOpenPassport}
-            onNavigateVerification={() => navigateToView('report-issue')}
+            onNavigateVerification={() => navigateToView('verify')}
             onNavigateJanmat={() => navigateToView('janmat')}
             onNavigateWardOverview={() => navigateToView('overview')}
           />
@@ -317,8 +319,20 @@ const AppContent: React.FC = () => {
           )
         )}
 
-        {/* VIEW 6: REPORT ISSUE (Citizen Reporting & 7-Stage Verify) */}
+        {/* VIEW 6: REPORT ISSUE (Citizen Complaint Form) */}
         {activeView === 'report-issue' && (
+          <PublicPortalView
+            initialRoadId={selectedRoadId}
+            currentWard={selectedWard}
+            role="citizen"
+            onOpenPassport={handleOpenPassport}
+            onOpenWorkOrder={(woId) => setActiveWorkOrderId(woId)}
+            initialTab="cases"
+          />
+        )}
+
+        {/* VIEW 6B: 7-STAGE REPAIR VERIFICATION */}
+        {activeView === 'verify' && (
           <PublicPortalView
             initialRoadId={selectedRoadId}
             currentWard={selectedWard}
