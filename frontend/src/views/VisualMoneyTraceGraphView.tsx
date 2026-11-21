@@ -77,7 +77,7 @@ interface SimNode extends GraphNode {
 
 export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps> = ({
   initialFocusType = 'road',
-  initialFocusId = 'RD_KE_01',
+  initialFocusId = 'RD0140',
   onOpenPassport,
   onOpenWorkOrder,
   onNavigateToWard
@@ -314,8 +314,8 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
             onChange={e => {
               const val = e.target.value as 'road' | 'work_order' | 'ward';
               setFocusType(val);
-              if (val === 'road') setInputVal('RD_KE_01');
-              if (val === 'work_order') setInputVal('WO_0001');
+              if (val === 'road') setInputVal('RD0140');
+              if (val === 'work_order') setInputVal('WO25-00600');
               if (val === 'ward') setInputVal('K/E');
             }}
             className="bg-slate-950 border border-slate-700 text-xs text-slate-200 rounded px-2.5 py-1.5 focus:outline-none focus:border-teal-500"
@@ -330,7 +330,7 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
               type="text"
               value={inputVal}
               onChange={e => setInputVal(e.target.value)}
-              placeholder="e.g. RD_KE_01, WO_0001..."
+              placeholder="e.g. RD0140, WO25-00600..."
               className="w-44 bg-slate-950 border border-slate-700 text-xs text-slate-200 rounded pl-7 pr-3 py-1.5 focus:outline-none focus:border-teal-500 font-mono"
             />
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2 top-2" />

@@ -179,5 +179,26 @@ export const api = {
     });
     if (!res.ok) throw new Error('Failed to submit officer response');
     return res.json();
+  },
+
+  // AI Assistant
+  askAssistant: async (
+    question: string,
+    default_ward?: string
+  ): Promise<{
+    answer: string;
+    language: string;
+    retrieved_context: any;
+    cited_records: Array<{ file: string; id: string }>;
+    missing_evidence: string[];
+    recommended_action: string;
+  }> => {
+    const res = await fetch(`${API_BASE}/assistant/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, default_ward: default_ward || 'K/E' })
+    });
+    if (!res.ok) throw new Error('Failed to query RupeeTrace assistant');
+    return res.json();
   }
 };

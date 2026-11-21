@@ -49,7 +49,7 @@ export const CitizenOfficerCasesView: React.FC<CitizenOfficerCasesViewProps> = (
   const [error, setError] = useState<string | null>(null);
 
   // New case form state (Citizen)
-  const [newRoadId, setNewRoadId] = useState<string>(initialRoadId || 'RD_KE_01');
+  const [newRoadId, setNewRoadId] = useState<string>(initialRoadId || 'RD0140');
   const [newWorkOrderId, setNewWorkOrderId] = useState<string>('');
   const [newObservation, setNewObservation] = useState<string>('');
   const [newEvidenceRef, setNewEvidenceRef] = useState<string>('');

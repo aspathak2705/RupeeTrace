@@ -17,8 +17,9 @@ from rupeetrace.services.accountability_service import AccountabilityService
 from rupeetrace.services.next_rupee_service import NextRupeeService
 from rupeetrace.services.case_service import CaseService
 from rupeetrace.services.graph_service import GraphService
+from rupeetrace.services.assistant_service import AssistantService
 
-from rupeetrace.api.routes import health, wards, roads, work_orders, audits, contractors, graph, cases
+from rupeetrace.api.routes import health, wards, roads, work_orders, audits, contractors, graph, cases, assistant
 
 def init_app_state(app: FastAPI):
     """Synchronously populates app.state so all routers and tests are immediately operational."""
@@ -45,6 +46,7 @@ def init_app_state(app: FastAPI):
     app.state.next_rupee_service = NextRupeeService(rel_service)
     app.state.case_service = CaseService()
     app.state.graph_service = GraphService(rel_service)
+    app.state.assistant_service = AssistantService(rel_service)
 
     # Pre-cache audit findings
     app.state.audit_service.get_all_findings(limit=1)
@@ -82,6 +84,7 @@ app.include_router(audits.router, prefix=settings.API_PREFIX)
 app.include_router(contractors.router, prefix=settings.API_PREFIX)
 app.include_router(graph.router, prefix=settings.API_PREFIX)
 app.include_router(cases.router, prefix=settings.API_PREFIX)
+app.include_router(assistant.router, prefix=settings.API_PREFIX)
 
 @app.get("/")
 def root():
