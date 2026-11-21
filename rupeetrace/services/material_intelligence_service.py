@@ -253,7 +253,7 @@ class MaterialIntelligenceService:
             alt_total_capex = round(base_cost * (1.0 + (alt_capex_diff_pct / 100.0)), 2)
             capex_savings_inr = round(base_cost - alt_total_capex, 2)
 
-            alt_lifecycle_total = round(base_cost * (alt.get("five_year_lifecycle_cost_sqm_inr", 5000) / max(1.0, baseline.get("five_year_lifecycle_cost_sqm_inr", 5000))), 2)
+            alt_lifecycle_total = round(base_cost * (alt.get("five_year_lifecycle_cost_sqm_inr", alt.get("five_year_lifecycle_cost_m_inr", 5000.0)) / max(1.0, baseline.get("five_year_lifecycle_cost_sqm_inr", baseline.get("five_year_lifecycle_cost_m_inr", 5000.0)))), 2)
             lifecycle_savings_inr = round((base_cost * 2.0) - alt_lifecycle_total, 2)
 
             comparisons.append({
@@ -264,13 +264,13 @@ class MaterialIntelligenceService:
                 "capex_difference_inr": -capex_savings_inr,
                 "capex_savings_pct": -alt_capex_diff_pct,
                 "five_year_lifecycle_cost_inr": alt_lifecycle_total,
-                "lifecycle_savings_pct": alt["savings_lifecycle_pct"],
-                "lifespan_years": alt["lifespan_years"],
-                "monsoon_flooding_resilience": alt["monsoon_flooding_resilience"],
-                "heavy_axle_load_rating": alt["heavy_axle_load_rating"],
-                "skid_resistance_bpn": alt["skid_resistance_bpn"],
-                "technical_trade_off": alt["trade_offs"],
-                "appropriate_conditions": alt["appropriate_conditions"]
+                "lifecycle_savings_pct": alt.get("savings_lifecycle_pct", 0.0),
+                "lifespan_years": alt.get("lifespan_years", 5.0),
+                "monsoon_flooding_resilience": alt.get("monsoon_flooding_resilience", 7.0),
+                "heavy_axle_load_rating": alt.get("heavy_axle_load_rating", 8.0),
+                "skid_resistance_bpn": alt.get("skid_resistance_bpn", 60),
+                "technical_trade_off": alt.get("trade_offs", "Standard specification trade-off"),
+                "appropriate_conditions": alt.get("appropriate_conditions", "General municipal roads")
             })
 
         return {

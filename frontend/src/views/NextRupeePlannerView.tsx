@@ -75,6 +75,8 @@ export const NextRupeePlannerView: React.FC<NextRupeePlannerViewProps> = ({
   // Contractor Intelligence State
   const [contractorComparison, setContractorComparison] = useState<ProposalContractorComparison | null>(null);
   const [tenderEvaluation, setTenderEvaluation] = useState<TenderEvaluationResponse | null>(null);
+  const [loadingContractors, setLoadingContractors] = useState<boolean>(false);
+  const [contractorError, setContractorError] = useState<string | null>(null);
 
   // Material & Cost State
   const [costOptReport, setCostOptReport] = useState<CostOptimizationReport | null>(null);
@@ -90,6 +92,8 @@ export const NextRupeePlannerView: React.FC<NextRupeePlannerViewProps> = ({
 
   // Unified Optimizer Brief
   const [unifiedBrief, setUnifiedBrief] = useState<UnifiedInvestmentBrief | null>(null);
+  const [loadingOptimizer, setLoadingOptimizer] = useState<boolean>(false);
+  const [optimizerError, setOptimizerError] = useState<string | null>(null);
 
   // Form states for suggestions
   const [newPropCategory, setNewPropCategory] = useState<string>('School access road improvement');
@@ -156,13 +160,34 @@ export const NextRupeePlannerView: React.FC<NextRupeePlannerViewProps> = ({
 
   // 4. Load Contractor Comparison for Selected Proposal
   const loadContractorData = async (propId: string) => {
+    setLoadingContractors(true);
+    setContractorError(null);
     try {
-      const data = await api.compareContractorsForProposal(propId);
-      setContractorComparison(data);
-      const tender = await api.evaluateTenderBids(propId);
-      setTenderEvaluation(tender);
+      const [compRes, tenderRes] = await Promise.allSettled([
+        api.compareContractorsForProposal(propId),
+        api.evaluateTenderBids(propId)
+      ]);
+
+      if (compRes.status === 'fulfilled') {
+        setContractorComparison(compRes.value);
+      } else {
+        console.error('Contractor comparison failed:', compRes.reason);
+      }
+
+      if (tenderRes.status === 'fulfilled') {
+        setTenderEvaluation(tenderRes.value);
+      } else {
+        console.warn('Tender evaluation notice:', tenderRes.reason);
+      }
+
+      if (compRes.status === 'rejected' && tenderRes.status === 'rejected') {
+        setContractorError('Unable to load contractor evaluation matrix for this proposal.');
+      }
     } catch (err: any) {
-      console.error(err);
+      console.error('Contractor data load error:', err);
+      setContractorError(err.message || 'Failed to load contractor intelligence');
+    } finally {
+      setLoadingContractors(false);
     }
   };
 
@@ -209,11 +234,16 @@ export const NextRupeePlannerView: React.FC<NextRupeePlannerViewProps> = ({
 
   // 7. Load Unified Brief
   const loadUnifiedBrief = async (propId: string) => {
+    setLoadingOptimizer(true);
+    setOptimizerError(null);
     try {
       const data = await api.getUnifiedDecisionBrief(propId);
       setUnifiedBrief(data);
     } catch (err: any) {
-      console.error(err);
+      console.error('Unified brief load error:', err);
+      setOptimizerError(err.message || 'Failed to generate 13-point civic value decision brief');
+    } finally {
+      setLoadingOptimizer(false);
     }
   };
 
@@ -1074,6 +1104,47 @@ export const NextRupeePlannerView: React.FC<NextRupeePlannerViewProps> = ({
             </div>
           </div>
 
+          {/* Loading Indicator */}
+          {loadingContractors && (
+            <div className="p-10 bg-white border-3 border-rt-ink rounded-[6px] shadow-brutal text-center space-y-3">
+              <RefreshCw className="w-8 h-8 animate-spin text-rt-primary mx-auto" />
+              <p className="font-headline font-black text-base text-rt-ink">
+                Evaluating Empanelled Contractors &amp; Historical Track Records...
+              </p>
+              <p className="text-xs font-mono text-rt-secondary-text">
+                Analyzing category job history, 30-day reopen rates, SLA compliance, and DLP breach history for {selectedProposal?.title || 'selected proposal'}.
+              </p>
+            </div>
+          )}
+
+          {/* Error State */}
+          {!loadingContractors && contractorError && !contractorComparison && (
+            <div className="p-6 bg-amber-50 border-3 border-rt-ink rounded-[6px] shadow-brutal space-y-3">
+              <div className="flex items-center gap-2 text-amber-900 font-bold">
+                <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                <span>Contractor Intelligence Notice</span>
+              </div>
+              <p className="text-xs font-mono text-amber-800">{contractorError}</p>
+              {selectedProposal && (
+                <button
+                  onClick={() => loadContractorData(selectedProposal.proposal_id)}
+                  className="px-3 py-1.5 bg-rt-ink text-white rounded text-xs font-bold hover:bg-neutral-800"
+                >
+                  Retry Analysis
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!loadingContractors && !contractorError && !contractorComparison && (
+            <div className="p-8 bg-white border-3 border-rt-ink rounded-[6px] shadow-brutal text-center space-y-2">
+              <HardHat className="w-8 h-8 text-rt-secondary-text mx-auto" />
+              <p className="font-headline font-bold text-rt-ink">No Contractor Comparison Data</p>
+              <p className="text-xs font-mono text-rt-secondary-text">Select a proposal from the dropdown above to run contractor suitability analysis.</p>
+            </div>
+          )}
+
           {/* Contractor Comparison Table */}
           {contractorComparison && (
             <div className="p-6 bg-white border-3 border-rt-ink rounded-[6px] shadow-brutal space-y-4">
@@ -1494,7 +1565,7 @@ export const NextRupeePlannerView: React.FC<NextRupeePlannerViewProps> = ({
       )}
 
       {/* TAB 6: CIVIC VALUE OPTIMIZER (THE UNIFYING REPORT) */}
-      {activeTab === 'optimizer' && unifiedBrief && (
+      {activeTab === 'optimizer' && (
         <div className="space-y-6">
           {/* Header Bar */}
           <div className="p-6 bg-white border-3 border-rt-ink rounded-[6px] shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -1503,45 +1574,122 @@ export const NextRupeePlannerView: React.FC<NextRupeePlannerViewProps> = ({
                 UNIFYING CIVIC INTELLIGENCE BRIEF
               </span>
               <h2 className="text-2xl font-headline font-black text-rt-ink mt-1">
-                {unifiedBrief.title}
+                {unifiedBrief?.title || selectedProposal?.title || '13-Point Civic Value Decision Brief'}
               </h2>
               <p className="text-xs font-mono text-rt-secondary-text">
-                Proposal ID: {unifiedBrief.proposal_id} • Ward {unifiedBrief.ward_code} • Asset: {unifiedBrief.road_name} ({unifiedBrief.road_id})
+                Proposal ID: {unifiedBrief?.proposal_id || selectedProposal?.proposal_id || 'N/A'} • Ward {unifiedBrief?.ward_code || wardCode} • Asset: {unifiedBrief?.road_name || selectedProposal?.related_road_name || 'N/A'} ({unifiedBrief?.road_id || selectedProposal?.related_road_id || 'N/A'})
               </p>
             </div>
 
-            <button
-              onClick={() => window.print()}
-              className="px-4 py-2 bg-rt-canvas hover:bg-neutral-200 text-rt-ink border-2 border-rt-ink rounded-[4px] font-headline font-black text-xs shadow-[2px_2px_0px_#171717] flex items-center space-x-1.5"
-            >
-              <FileDown className="w-4 h-4" />
-              <span>Print / Export Brief</span>
-            </button>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+              <div className="text-left sm:text-right">
+                <span className="text-[10px] font-mono text-rt-secondary-text block">Selected Proposal</span>
+                <select
+                  value={selectedProposal?.proposal_id}
+                  onChange={(e) => {
+                    const p = proposals.find(item => item.proposal_id === e.target.value);
+                    if (p) setSelectedProposal(p);
+                  }}
+                  className="px-3 py-1.5 bg-white border-2 border-rt-ink rounded text-xs font-mono font-bold"
+                >
+                  {proposals.map(p => (
+                    <option key={p.proposal_id} value={p.proposal_id}>
+                      {p.proposal_id}: {p.title.slice(0, 40)}...
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {unifiedBrief && (
+                <button
+                  onClick={() => window.print()}
+                  className="px-4 py-2 bg-rt-canvas hover:bg-neutral-200 text-rt-ink border-2 border-rt-ink rounded-[4px] font-headline font-black text-xs shadow-[2px_2px_0px_#171717] flex items-center space-x-1.5 self-stretch sm:self-end"
+                >
+                  <FileDown className="w-4 h-4" />
+                  <span>Print / Export Brief</span>
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* 13-Point Structured Answers Matrix */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {Object.entries(unifiedBrief.answers_to_13_questions).map(([key, val]) => (
-              <div key={key} className="p-5 bg-white border-3 border-rt-ink rounded-[6px] shadow-brutal space-y-2">
-                <h4 className="font-headline font-black text-sm text-rt-ink border-b-2 border-rt-ink pb-1">
-                  {val.question}
-                </h4>
-                <div className="text-xs font-mono text-neutral-800 space-y-1 pt-1">
-                  {Object.entries(val).map(([k, v]) => {
-                    if (k === 'question') return null;
-                    return (
-                      <div key={k} className="flex justify-between items-start gap-2">
-                        <span className="text-rt-secondary-text font-bold capitalize">{k.replace(/_/g, ' ')}:</span>
-                        <span className="font-bold text-right text-rt-ink">
-                          {typeof v === 'object' ? JSON.stringify(v) : String(v)}
-                        </span>
-                      </div>
-                    );
-                  })}
+          {/* Loading Indicator */}
+          {loadingOptimizer && (
+            <div className="p-12 bg-white border-3 border-rt-ink rounded-[6px] shadow-brutal text-center space-y-3">
+              <RefreshCw className="w-8 h-8 animate-spin text-rt-primary mx-auto" />
+              <p className="font-headline font-black text-base text-rt-ink">
+                Synthesizing 13-Point Civic Intelligence Brief...
+              </p>
+              <p className="text-xs font-mono text-rt-secondary-text">
+                Harmonizing citizen sentiment, IRC material trade-offs, empanelled contractor suitability, and statutory DLP liability for {selectedProposal?.title || 'selected proposal'}.
+              </p>
+            </div>
+          )}
+
+          {/* Error / Fallback State */}
+          {!loadingOptimizer && optimizerError && !unifiedBrief && (
+            <div className="p-6 bg-amber-50 border-3 border-rt-ink rounded-[6px] shadow-brutal space-y-4">
+              <div className="flex items-center gap-3 text-amber-900 font-bold">
+                <AlertTriangle className="w-6 h-6 text-amber-600 flex-shrink-0" />
+                <div>
+                  <h4 className="font-headline font-black text-base">Unable to Load Complete Decision Brief</h4>
+                  <p className="text-xs font-mono text-amber-800 mt-0.5">{optimizerError}</p>
                 </div>
               </div>
-            ))}
-          </div>
+              {selectedProposal && (
+                <div className="p-4 bg-white border-2 border-rt-ink rounded text-xs font-mono space-y-2">
+                  <div className="font-bold text-rt-ink">Selected Proposal Parameters:</div>
+                  <div><strong>Title:</strong> {selectedProposal.title}</div>
+                  <div><strong>Problem Statement:</strong> {selectedProposal.problem_statement}</div>
+                  <div><strong>Indicative Cost:</strong> ₹{selectedProposal.indicative_cost_inr.toLocaleString()}</div>
+                  <div><strong>Category:</strong> {selectedProposal.category}</div>
+                  <div><strong>Composite Score:</strong> {selectedProposal.composite_score}/100</div>
+                </div>
+              )}
+              {selectedProposal && (
+                <button
+                  onClick={() => loadUnifiedBrief(selectedProposal.proposal_id)}
+                  className="px-4 py-2 bg-rt-ink text-white rounded font-headline font-bold text-xs hover:bg-neutral-800"
+                >
+                  Retry Generation
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!loadingOptimizer && !optimizerError && !unifiedBrief && (
+            <div className="p-8 bg-white border-3 border-rt-ink rounded-[6px] shadow-brutal text-center space-y-2">
+              <FileText className="w-8 h-8 text-rt-secondary-text mx-auto" />
+              <p className="font-headline font-bold text-rt-ink">No Decision Brief Available</p>
+              <p className="text-xs font-mono text-rt-secondary-text">Select a proposal from the dropdown above to generate the unifying 13-point brief.</p>
+            </div>
+          )}
+
+          {/* 13-Point Structured Answers Matrix */}
+          {!loadingOptimizer && unifiedBrief && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {Object.entries(unifiedBrief.answers_to_13_questions).map(([key, val]) => (
+                <div key={key} className="p-5 bg-white border-3 border-rt-ink rounded-[6px] shadow-brutal space-y-2">
+                  <h4 className="font-headline font-black text-sm text-rt-ink border-b-2 border-rt-ink pb-1">
+                    {val.question}
+                  </h4>
+                  <div className="text-xs font-mono text-neutral-800 space-y-1 pt-1">
+                    {Object.entries(val).map(([k, v]) => {
+                      if (k === 'question') return null;
+                      return (
+                        <div key={k} className="flex justify-between items-start gap-2">
+                          <span className="text-rt-secondary-text font-bold capitalize">{k.replace(/_/g, ' ')}:</span>
+                          <span className="font-bold text-right text-rt-ink">
+                            {typeof v === 'object' ? JSON.stringify(v) : String(v)}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
