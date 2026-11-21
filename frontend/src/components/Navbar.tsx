@@ -1,7 +1,7 @@
 import React from 'react';
 import {
-  TrendingUp, Compass, ShieldAlert, Users, Award, GitBranch,
-  Search, ShieldCheck, UserCheck, MessageSquare
+  TrendingUp, Compass, ShieldAlert, Award,
+  Search, ShieldCheck, UserCheck, CheckSquare, Sparkles
 } from 'lucide-react';
 
 interface Props {
@@ -15,6 +15,7 @@ interface Props {
   setSearchQuery: (query: string) => void;
   onSearchSubmit: (query: string) => void;
   wardsList: string[];
+  onOpenAssistant: () => void;
 }
 
 export const Navbar: React.FC<Props> = ({
@@ -27,18 +28,19 @@ export const Navbar: React.FC<Props> = ({
   searchQuery,
   setSearchQuery,
   onSearchSubmit,
-  wardsList
+  wardsList,
+  onOpenAssistant
 }) => {
   return (
     <header className="sticky top-0 z-40 bg-white border-b-3 border-rt-ink font-body">
-      {/* Top Banner Row */}
+      {/* Top Header Row */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-4">
           
           {/* Logo & Product Wordmark */}
           <div
             className="flex items-center gap-3 shrink-0 cursor-pointer select-none"
-            onClick={() => setActiveView('money-trail')}
+            onClick={() => setActiveView('overview')}
           >
             <div className="w-9 h-9 bg-rt-primary border-2 border-rt-ink rounded-[4px] shadow-brutal-sm flex items-center justify-center font-headline font-black text-xl text-rt-ink leading-none">
               ₹
@@ -58,7 +60,7 @@ export const Navbar: React.FC<Props> = ({
             </div>
           </div>
 
-          {/* Search Bar */}
+          {/* Quick Search Bar */}
           <div className="flex-1 max-w-md hidden md:block">
             <form
               onSubmit={(e) => {
@@ -70,7 +72,7 @@ export const Navbar: React.FC<Props> = ({
               <Search className="w-4 h-4 text-rt-ink absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search Road ID (RD0140), Work Order (WO25-00600)..."
+                placeholder="Search Road (RD0140), Work Order (WO25-00600)..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-rt-canvas border-2 border-rt-ink rounded-[4px] pl-9 pr-4 py-1.5 text-xs text-rt-ink placeholder-rt-secondary-text font-mono font-medium focus:outline-none focus:bg-white focus:shadow-brutal-sm transition-all"
@@ -78,8 +80,8 @@ export const Navbar: React.FC<Props> = ({
             </form>
           </div>
 
-          {/* Ward Selector & Role Toggle */}
-          <div className="flex items-center gap-3 shrink-0">
+          {/* Ward Selector, Role Toggle & AI Button */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Ward Selector */}
             <div className="flex items-center gap-1.5 bg-rt-canvas px-2.5 py-1 rounded-[4px] border-2 border-rt-ink text-xs shadow-brutal-sm">
               <span className="text-rt-secondary-text font-bold uppercase font-mono text-[10px]">Ward:</span>
@@ -123,19 +125,28 @@ export const Navbar: React.FC<Props> = ({
                 <span className="hidden sm:inline">Officer</span>
               </button>
             </div>
+
+            {/* Global AI Assistant Trigger */}
+            <button
+              onClick={onOpenAssistant}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] bg-rt-primary hover:bg-yellow-300 border-2 border-rt-ink font-headline font-black text-xs text-rt-ink shadow-brutal-sm active:translate-x-[1px] active:translate-y-[1px] transition-all"
+              title="Open Multilingual AI Assistant (Ctrl+K)"
+            >
+              <span className="w-4 h-4 bg-white border border-rt-ink rounded-full flex items-center justify-center font-black text-[10px]">₹</span>
+              <span className="hidden md:inline">AI ASSISTANT</span>
+              <span className="text-[9px] bg-white px-1 rounded border border-rt-ink font-mono font-bold">⌘K</span>
+            </button>
           </div>
         </div>
 
-        {/* Navigation Tabs Bar */}
+        {/* 5 Primary Navigation Tabs */}
         <nav className="flex items-center space-x-1.5 overflow-x-auto py-2.5 border-t-2 border-rt-ink/20 no-scrollbar text-xs font-headline">
           {[
-            { id: 'money-trail', label: 'Ward Money Trail', icon: TrendingUp },
-            { id: 'passport', label: 'Road Passport', icon: Compass, badge: 'SIGNATURE', badgeColor: 'bg-rt-primary' },
-            { id: 'graph', label: 'Visual Money Trace Graph', icon: GitBranch, badge: 'SIGNATURE', badgeColor: 'bg-rt-mint' },
-            { id: 'audits', label: 'Repair Auditor', icon: ShieldAlert },
-            { id: 'contractors', label: 'Contractor Scorecards', icon: Users },
-            { id: 'next-rupee', label: 'Next Rupee & JANMAT', icon: Award, badge: 'PLANNER 2.0', badgeColor: 'bg-rt-primary' },
-            { id: 'cases', label: 'Cases & Observations', icon: MessageSquare }
+            { id: 'overview', label: '1. Overview', icon: TrendingUp },
+            { id: 'investigate', label: '2. Investigate', icon: Compass, badge: 'SIGNATURE', badgeColor: 'bg-rt-primary' },
+            { id: 'accountability', label: '3. Accountability', icon: ShieldAlert, badge: 'FORENSIC', badgeColor: 'bg-rt-coral text-white' },
+            { id: 'next-rupee', label: '4. Next Rupee', icon: Award, badge: 'PLANNER 2.0', badgeColor: 'bg-rt-primary' },
+            { id: 'portal', label: '5. Public Portal', icon: CheckSquare, badge: 'CITIZEN PROOF', badgeColor: 'bg-rt-mint' }
           ].map(tab => {
             const Icon = tab.icon;
             const isActive = activeView === tab.id;
@@ -153,7 +164,7 @@ export const Navbar: React.FC<Props> = ({
                 <Icon className="w-3.5 h-3.5" />
                 <span>{tab.label}</span>
                 {tab.badge && (
-                  <span className={`text-[9px] font-mono px-1 py-0.2 rounded-[2px] border border-rt-ink ${tab.badgeColor} text-rt-ink ml-0.5`}>
+                  <span className={`text-[9px] font-mono px-1 py-0.2 rounded-[2px] border border-rt-ink ${tab.badgeColor} ml-0.5`}>
                     {tab.badge}
                   </span>
                 )}

@@ -1,3 +1,4 @@
+import urllib.parse
 from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, Request, HTTPException, Path, Query, Body, UploadFile, File, Form
 from pydantic import BaseModel, Field
@@ -172,6 +173,17 @@ def update_proposal_lifecycle(
 
 # --- Civic Budget Simulator Endpoints ---
 
+@router.get("/simulator/{ward_prefix}/{ward_suffix}")
+def simulate_split_ward_scenarios(
+    request: Request,
+    ward_prefix: str,
+    ward_suffix: str,
+    custom_budget: Optional[float] = None,
+    contingency_pct: float = 5.0,
+    max_projects: Optional[int] = None
+):
+    return simulate_ward_scenarios(request, f"{ward_prefix}/{ward_suffix}", custom_budget, contingency_pct, max_projects)
+
 @router.get("/simulator/{ward_code}")
 def simulate_ward_scenarios(
     request: Request,
@@ -181,15 +193,25 @@ def simulate_ward_scenarios(
     max_projects: Optional[int] = None
 ):
     sim_svc = request.app.state.budget_simulator_service
+    code = urllib.parse.unquote(ward_code) if "urllib" in globals() else ward_code
     try:
         return sim_svc.simulate_scenarios_for_ward(
-            ward_code=ward_code,
+            ward_code=code,
             custom_budget=custom_budget,
             contingency_pct=contingency_pct,
             max_projects=max_projects
         )
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+@router.post("/simulator/{ward_prefix}/{ward_suffix}/optimize")
+def optimize_split_budget(
+    request: Request,
+    ward_prefix: str,
+    ward_suffix: str,
+    body: OptimizeBudgetRequest = Body(...)
+):
+    return optimize_budget(request, f"{ward_prefix}/{ward_suffix}", body)
 
 @router.post("/simulator/{ward_code}/optimize")
 def optimize_budget(

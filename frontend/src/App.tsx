@@ -3,19 +3,20 @@ import { Navbar } from './components/Navbar';
 import { DemoTourBar } from './components/DemoTourBar';
 import { AIAssistantDrawer } from './components/AIAssistantDrawer';
 import { WorkOrderEvidenceModal } from './components/WorkOrderEvidenceModal';
-import { WardMoneyTrailView } from './views/WardMoneyTrailView';
-import { RoadPassportView } from './views/RoadPassportView';
-import { VisualMoneyTraceGraphView } from './views/VisualMoneyTraceGraphView';
-import { AuditsInvestigationView } from './views/AuditsInvestigationView';
-import { FairAccountabilityView } from './views/FairAccountabilityView';
+import { OverviewView } from './views/OverviewView';
+import { InvestigateView } from './views/InvestigateView';
+import { AccountabilityView } from './views/AccountabilityView';
 import { NextRupeePlannerView } from './views/NextRupeePlannerView';
-import { CitizenOfficerCasesView } from './views/CitizenOfficerCasesView';
+import { PublicPortalView } from './views/PublicPortalView';
 import { api } from './api/client';
 
 export const App: React.FC = () => {
-  const [activeView, setActiveView] = useState<string>('money-trail');
+  // 5 Primary Destinations: 'overview' | 'investigate' | 'accountability' | 'next-rupee' | 'portal'
+  const [activeView, setActiveView] = useState<string>('overview');
   const [selectedWard, setSelectedWard] = useState<string>('K/E');
   const [selectedRoadId, setSelectedRoadId] = useState<string>('RD0140');
+  const [investigateMode, setInvestigateMode] = useState<'passport' | 'graph' | 'ledger'>('passport');
+  const [accountabilityTab, setAccountabilityTab] = useState<'sentinel' | 'scorecards'>('sentinel');
   const [role, setRole] = useState<'citizen' | 'officer'>('citizen');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeWorkOrderId, setActiveWorkOrderId] = useState<string | null>(null);
@@ -37,12 +38,24 @@ export const App: React.FC = () => {
       .catch(err => console.error('Error fetching wards:', err));
   }, []);
 
-  // Hash-based routing synchronization
+  // Global Keyboard shortcut (Cmd+K / Ctrl+K) for AI Assistant
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setShowAssistant(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Hash-based routing synchronization (with backward compatibility)
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace(/^#\/?/, '');
-      if (!hash) {
-        setActiveView('money-trail');
+      if (!hash || hash === 'overview' || hash === 'money-trail') {
+        setActiveView('overview');
         return;
       }
 
@@ -50,20 +63,26 @@ export const App: React.FC = () => {
         const roadId = hash.replace('passport/', '');
         if (roadId) {
           setSelectedRoadId(decodeURIComponent(roadId));
-          setActiveView('passport');
+          setInvestigateMode('passport');
+          setActiveView('investigate');
         }
       } else if (hash.startsWith('graph')) {
-        setActiveView('graph');
+        setInvestigateMode('graph');
+        setActiveView('investigate');
+      } else if (hash.startsWith('investigate')) {
+        setActiveView('investigate');
       } else if (hash.startsWith('audits')) {
-        setActiveView('audits');
+        setAccountabilityTab('sentinel');
+        setActiveView('accountability');
       } else if (hash.startsWith('contractors')) {
-        setActiveView('contractors');
+        setAccountabilityTab('scorecards');
+        setActiveView('accountability');
+      } else if (hash.startsWith('accountability')) {
+        setActiveView('accountability');
       } else if (hash.startsWith('next-rupee')) {
         setActiveView('next-rupee');
-      } else if (hash.startsWith('cases')) {
-        setActiveView('cases');
-      } else if (hash.startsWith('money-trail')) {
-        setActiveView('money-trail');
+      } else if (hash.startsWith('cases') || hash.startsWith('portal')) {
+        setActiveView('portal');
       }
     };
 
@@ -74,60 +93,62 @@ export const App: React.FC = () => {
 
   const navigateToView = (view: string) => {
     setActiveView(view);
-    if (view === 'passport') {
-      window.location.hash = `#/passport/${selectedRoadId}`;
-    } else {
-      window.location.hash = `#/${view}`;
-    }
+    window.location.hash = `#/${view}`;
   };
 
   const handleOpenPassport = (roadId: string) => {
     setSelectedRoadId(roadId);
-    setActiveView('passport');
-    window.location.hash = `#/passport/${roadId}`;
+    setInvestigateMode('passport');
+    setActiveView('investigate');
+    window.location.hash = `#/passport/${encodeURIComponent(roadId)}`;
   };
 
   const handleSearchSubmit = (query: string) => {
     const clean = query.trim().toUpperCase();
     if (!clean) return;
 
-    if (clean.startsWith('RD') || clean.includes('ROAD')) {
+    if (clean.startsWith('RD') || clean.includes('ROAD') || clean.includes('MARG')) {
       handleOpenPassport(clean);
     } else if (clean.startsWith('WO')) {
       setActiveWorkOrderId(clean);
     } else if (wardsList.includes(clean)) {
       setSelectedWard(clean);
-      navigateToView('money-trail');
+      navigateToView('overview');
     } else {
       handleOpenPassport(clean);
     }
   };
 
-  // Demo Tour Handler for 4-minute demo
+  // Demo Tour Handler for 4-minute evaluation
   const handleDemoStep = (step: number) => {
     switch (step) {
-      case 1: // Ward Money Trail
+      case 1: // Destination 1: Ward Overview & Money Trail
         setSelectedWard('K/E');
-        navigateToView('money-trail');
+        navigateToView('overview');
         break;
-      case 2: // Road Passport RD0140
+      case 2: // Destination 2: Road Passport RD0140
         setSelectedRoadId('RD0140');
-        handleOpenPassport('RD0140');
+        setInvestigateMode('passport');
+        setActiveView('investigate');
+        window.location.hash = `#/passport/RD0140`;
         break;
-      case 3: // Visual Money Trace Graph
+      case 3: // Destination 2: Money Trace Graph
         setSelectedRoadId('RD0140');
-        navigateToView('graph');
+        setInvestigateMode('graph');
+        setActiveView('investigate');
+        window.location.hash = `#/graph`;
         break;
-      case 4: // Work Order Audit (WO25-00600)
+      case 4: // Destination 3: Audit Evidence Modal (WO25-00600)
         setActiveWorkOrderId('WO25-00600');
         break;
-      case 5: // Fair Accountability
-        navigateToView('contractors');
+      case 5: // Destination 3: Accountability & Contractor Scorecards
+        setAccountabilityTab('scorecards');
+        navigateToView('accountability');
         break;
-      case 6: // Citizen/Officer Case Dialogue
-        navigateToView('cases');
+      case 6: // Destination 5: Public Portal & Citizen Verification
+        navigateToView('portal');
         break;
-      case 7: // Next Rupee Planner
+      case 7: // Destination 4: Next Rupee Planner 2.0
         setSelectedWard('K/E');
         navigateToView('next-rupee');
         break;
@@ -138,7 +159,7 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-rt-canvas text-rt-ink flex flex-col font-body selection:bg-rt-primary selection:text-rt-ink">
-      {/* Top Banner: Synthetic Data Notice */}
+      {/* Top Banner: Synthetic Civic Research Data Notice */}
       <div className="bg-rt-ink text-white border-b-2 border-rt-ink text-[11px] font-mono py-1 px-4 text-center flex items-center justify-center space-x-2">
         <span className="w-2 h-2 rounded-full bg-rt-primary animate-pulse" />
         <span>
@@ -152,7 +173,7 @@ export const App: React.FC = () => {
         onOpenAssistant={() => setShowAssistant(true)}
       />
 
-      {/* Main Global Navigation */}
+      {/* Main Global Navigation (5 Primary Destinations) */}
       <Navbar
         activeView={activeView}
         setActiveView={navigateToView}
@@ -164,68 +185,62 @@ export const App: React.FC = () => {
         setSearchQuery={setSearchQuery}
         onSearchSubmit={handleSearchSubmit}
         wardsList={wardsList}
+        onOpenAssistant={() => setShowAssistant(true)}
       />
 
       {/* Active Page View */}
       <main className="flex-1">
-        {activeView === 'money-trail' && (
-          <WardMoneyTrailView
+        {/* DESTINATION 1: OVERVIEW */}
+        {activeView === 'overview' && (
+          <OverviewView
             wardCode={selectedWard}
-            onSelectRoad={handleOpenPassport}
-            onSelectWorkOrder={(woId) => setActiveWorkOrderId(woId)}
-            onNavigateAudits={(code) => {
-              setSelectedWard(code);
-              navigateToView('audits');
+            onInvestigateRoad={handleOpenPassport}
+            onOpenWorkOrder={(woId) => setActiveWorkOrderId(woId)}
+            onNavigateAccountability={(tab) => {
+              if (tab === 'scorecards') setAccountabilityTab('scorecards');
+              else setAccountabilityTab('sentinel');
+              navigateToView('accountability');
             }}
+            onNavigateNextRupee={() => navigateToView('next-rupee')}
+            onNavigatePortal={() => navigateToView('portal')}
           />
         )}
 
-        {activeView === 'passport' && (
-          <RoadPassportView
-            roadId={selectedRoadId}
+        {/* DESTINATION 2: INVESTIGATE */}
+        {activeView === 'investigate' && (
+          <InvestigateView
+            currentRoadId={selectedRoadId}
+            onSelectRoad={handleOpenPassport}
             onSelectWorkOrder={(woId) => setActiveWorkOrderId(woId)}
-            onNavigateGraph={(roadId) => {
-              setSelectedRoadId(roadId);
-              navigateToView('graph');
+            onNavigateToWard={(code) => {
+              setSelectedWard(code);
+              navigateToView('overview');
             }}
             onNavigateCreateCase={(roadId) => {
               setSelectedRoadId(roadId);
-              navigateToView('cases');
+              navigateToView('portal');
             }}
+            initialMode={investigateMode}
           />
         )}
 
-        {activeView === 'graph' && (
-          <VisualMoneyTraceGraphView
-            initialFocusType="road"
-            initialFocusId={selectedRoadId}
+        {/* DESTINATION 3: ACCOUNTABILITY */}
+        {activeView === 'accountability' && (
+          <AccountabilityView
+            currentWard={selectedWard}
+            role={role}
             onOpenPassport={handleOpenPassport}
-            onOpenWorkOrder={(woId) => setActiveWorkOrderId(woId)}
-            onNavigateToWard={(code) => {
-              setSelectedWard(code);
-              navigateToView('money-trail');
-            }}
-          />
-        )}
-
-        {activeView === 'audits' && (
-          <AuditsInvestigationView
-            initialWard={selectedWard}
-            onOpenPassport={handleOpenPassport}
-            onOpenWorkOrder={(woId) => setActiveWorkOrderId(woId)}
-          />
-        )}
-
-        {activeView === 'contractors' && (
-          <FairAccountabilityView
             onOpenWorkOrder={(woId) => setActiveWorkOrderId(woId)}
             onNavigateToGraph={(type, id) => {
               if (type === 'road') setSelectedRoadId(id);
-              navigateToView('graph');
+              setInvestigateMode('graph');
+              setActiveView('investigate');
             }}
+            initialSubTab={accountabilityTab}
           />
         )}
 
+        {/* DESTINATION 4: NEXT RUPEE */}
         {activeView === 'next-rupee' && (
           <NextRupeePlannerView
             initialWard={selectedWard}
@@ -234,14 +249,16 @@ export const App: React.FC = () => {
             onOpenPassport={handleOpenPassport}
             onNavigateToMoneyTrail={(code) => {
               setSelectedWard(code);
-              navigateToView('money-trail');
+              navigateToView('overview');
             }}
           />
         )}
 
-        {activeView === 'cases' && (
-          <CitizenOfficerCasesView
+        {/* DESTINATION 5: PUBLIC PORTAL */}
+        {activeView === 'portal' && (
+          <PublicPortalView
             initialRoadId={selectedRoadId}
+            currentWard={selectedWard}
             role={role}
             onOpenPassport={handleOpenPassport}
             onOpenWorkOrder={(woId) => setActiveWorkOrderId(woId)}
@@ -253,7 +270,7 @@ export const App: React.FC = () => {
       <button
         onClick={() => setShowAssistant(true)}
         className="fixed bottom-6 right-6 px-4 py-3 bg-rt-primary hover:bg-yellow-300 text-rt-ink border-3 border-rt-ink rounded-[6px] shadow-brutal-lg z-40 transition-transform active:translate-x-[2px] active:translate-y-[2px] font-headline font-black text-xs flex items-center space-x-2"
-        title="Open RupeeTrace Multilingual AI Assistant"
+        title="Open RupeeTrace Multilingual AI Assistant (Ctrl+K)"
       >
         <span className="w-5 h-5 bg-white border border-rt-ink rounded-full flex items-center justify-center font-black text-xs">₹</span>
         <span>AI ASSISTANT</span>
@@ -266,9 +283,10 @@ export const App: React.FC = () => {
           workOrderId={activeWorkOrderId}
           onClose={() => setActiveWorkOrderId(null)}
           onNavigateRoad={handleOpenPassport}
-          onNavigateGraph={(woId) => {
+          onNavigateGraph={() => {
             setActiveWorkOrderId(null);
-            navigateToView('graph');
+            setInvestigateMode('graph');
+            setActiveView('investigate');
           }}
         />
       )}

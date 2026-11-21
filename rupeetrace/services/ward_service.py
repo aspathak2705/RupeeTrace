@@ -126,6 +126,7 @@ class WardService:
             "dlp_breach_work_orders": dlp_breach_count,
             "dlp_breach_spend_inr": round(dlp_breach_spend, 2),
             "overbilled_work_orders": overbilled_count,
+            "total_roads": len(ward_roads),
             "contractor_spend_breakdown": list(contractor_spend.values()),
             "roads": ward_roads,
             "flood_hotspots": hotspots_summary,

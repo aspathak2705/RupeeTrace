@@ -73,6 +73,8 @@ class RoadService:
             "total_work_orders": len(wos),
             "total_spend_inr": round(total_spend, 2),
             "dlp_breach_detected": road.under_dlp and total_spend > 0,
+            "accidents_count": len(accidents),
+            "congestion_index": traffic.congestion_index_0_10 if traffic else None,
             "traffic": {
                 "peak_hour_vehicles": traffic.peak_hour_vehicles,
                 "avg_peak_speed_kmph": traffic.avg_peak_speed_kmph,
