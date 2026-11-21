@@ -40,7 +40,7 @@ export const AccessRestrictedGate: React.FC<Props> = ({ workspaceName, onOpenLog
           onClick={onOpenLogin}
           className="w-full sm:w-auto px-6 py-3 bg-rt-primary hover:bg-yellow-300 text-rt-ink border-2 border-rt-ink rounded-[4px] font-headline font-black text-xs uppercase tracking-wider shadow-brutal active:translate-x-[1px] active:translate-y-[1px] flex items-center justify-center gap-2"
         >
-          <span>Switch to Officer Session (Er. R. K. Patil)</span>
+          <span>Authenticate with Authorized Officer Credentials</span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>

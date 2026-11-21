@@ -2,7 +2,7 @@ import React from 'react';
 import {
   TrendingUp, Compass, ShieldAlert, Award,
   Search, ShieldCheck, UserCheck, CheckSquare,
-  Sparkles, Network, Vote, Lock, LogIn
+  Network, Vote, LogOut, LogIn
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -15,7 +15,7 @@ interface Props {
   setSearchQuery: (query: string) => void;
   onSearchSubmit: (query: string) => void;
   wardsList: string[];
-  onOpenAssistant: () => void;
+  onOpenAssistant?: () => void;
   onOpenLogin: () => void;
 }
 
@@ -28,25 +28,24 @@ export const Navbar: React.FC<Props> = ({
   setSearchQuery,
   onSearchSubmit,
   wardsList,
-  onOpenAssistant,
   onOpenLogin
 }) => {
-  const { user, isOfficer } = useAuth();
+  const { user, isOfficer, logout } = useAuth();
 
   const citizenTabs = [
     { id: 'citizen-home', label: 'Home', icon: Compass },
-    { id: 'explore-roads', label: 'Explore Roads', icon: Search, badge: 'ROAD PASSPORT', badgeColor: 'bg-rt-primary' },
-    { id: 'report-issue', label: 'Report Issue', icon: CheckSquare, badge: '7-STAGE VERIFY', badgeColor: 'bg-rt-mint' },
-    { id: 'janmat', label: 'JANMAT', icon: Vote, badge: 'VOTING', badgeColor: 'bg-rt-primary' },
-    { id: 'my-activity', label: 'My Activity', icon: UserCheck, badge: 'TRACKER', badgeColor: 'bg-white' }
+    { id: 'explore-roads', label: 'Explore Roads', icon: Search },
+    { id: 'report-issue', label: 'Report Issue', icon: CheckSquare },
+    { id: 'janmat', label: 'JANMAT', icon: Vote },
+    { id: 'my-activity', label: 'My Activity', icon: UserCheck }
   ];
 
   const officerTabs = [
     { id: 'overview', label: 'Overview', icon: TrendingUp },
-    { id: 'investigate', label: 'Investigate', icon: Network, badge: '6 MODES', badgeColor: 'bg-rt-primary' },
-    { id: 'accountability', label: 'Accountability', icon: ShieldAlert, badge: 'DLP & AUDIT', badgeColor: 'bg-rt-coral text-white' },
-    { id: 'next-rupee', label: 'Next Rupee', icon: Award, badge: 'PLANNER 2.0', badgeColor: 'bg-rt-primary' },
-    { id: 'citizen-mgmt', label: 'Citizen Management', icon: CheckSquare, badge: 'TRIAGE', badgeColor: 'bg-rt-mint' }
+    { id: 'investigate', label: 'Investigate', icon: Network },
+    { id: 'accountability', label: 'Accountability', icon: ShieldAlert },
+    { id: 'next-rupee', label: 'Next Rupee', icon: Award },
+    { id: 'citizen-mgmt', label: 'Citizen Management', icon: CheckSquare }
   ];
 
   const currentTabs = isOfficer ? officerTabs : citizenTabs;
@@ -102,7 +101,7 @@ export const Navbar: React.FC<Props> = ({
             </form>
           </div>
 
-          {/* Ward Selector, Auth Badge & AI Assistant */}
+          {/* Ward Selector & Authenticated Identity / Logout */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             
             {/* Ward Selector */}
@@ -121,42 +120,48 @@ export const Navbar: React.FC<Props> = ({
               </select>
             </div>
 
-            {/* Authenticated Persona Badge & Role Switcher */}
-            <div
-              onClick={onOpenLogin}
-              className={`flex items-center gap-2 px-2.5 py-1 rounded-[4px] border-2 border-rt-ink text-xs cursor-pointer shadow-brutal-sm transition-all hover:shadow-brutal ${
-                isOfficer ? 'bg-rt-mint' : 'bg-rt-primary'
-              }`}
-              title="Click to switch verified prototype profile"
-            >
-              {isOfficer ? (
-                <ShieldCheck className="w-3.5 h-3.5 text-rt-ink shrink-0" />
-              ) : (
-                <UserCheck className="w-3.5 h-3.5 text-rt-ink shrink-0" />
-              )}
-              <div className="flex flex-col text-left leading-none">
-                <span className="font-headline font-black text-rt-ink text-[11px] truncate max-w-[110px]">
-                  {user?.name || (isOfficer ? 'Er. R. K. Patil' : 'Sunita Sharma')}
-                </span>
-                <span className="text-[9px] font-mono text-rt-ink/80 uppercase font-bold">
-                  {isOfficer ? 'Executive Eng.' : 'Public Citizen'}
-                </span>
-              </div>
-              <span className="text-[9px] bg-white border border-rt-ink px-1 rounded font-mono font-bold">
-                Switch
-              </span>
-            </div>
+            {/* Authenticated Identity & Logout Action */}
+            {user ? (
+              <div className="flex items-center gap-2">
+                <div
+                  className={`flex items-center gap-2 px-2.5 py-1 rounded-[4px] border-2 border-rt-ink text-xs shadow-brutal-sm ${
+                    isOfficer ? 'bg-rt-mint' : 'bg-rt-primary'
+                  }`}
+                >
+                  {isOfficer ? (
+                    <ShieldCheck className="w-3.5 h-3.5 text-rt-ink shrink-0" />
+                  ) : (
+                    <UserCheck className="w-3.5 h-3.5 text-rt-ink shrink-0" />
+                  )}
+                  <div className="flex flex-col text-left leading-none">
+                    <span className="font-headline font-black text-rt-ink text-[11px] truncate max-w-[120px]">
+                      {user.name}
+                    </span>
+                    <span className="text-[9px] font-mono text-rt-ink/80 uppercase font-bold">
+                      {isOfficer ? 'Municipal Officer' : 'Public Citizen'}
+                    </span>
+                  </div>
+                </div>
 
-            {/* Global AI Assistant Trigger */}
-            <button
-              onClick={onOpenAssistant}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] bg-rt-primary hover:bg-yellow-300 border-2 border-rt-ink font-headline font-black text-xs text-rt-ink shadow-brutal-sm active:translate-x-[1px] active:translate-y-[1px] transition-all"
-              title="Open Multilingual AI Assistant (Ctrl+K)"
-            >
-              <span className="w-4 h-4 bg-white border border-rt-ink rounded-full flex items-center justify-center font-black text-[10px]">₹</span>
-              <span className="hidden lg:inline">AI ASSISTANT</span>
-              <span className="text-[9px] bg-white px-1 rounded border border-rt-ink font-mono font-bold">⌘K</span>
-            </button>
+                <button
+                  onClick={logout}
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-[4px] bg-white hover:bg-rt-canvas border-2 border-rt-ink text-xs font-mono font-bold text-rt-ink shadow-brutal-sm active:translate-x-[1px] active:translate-y-[1px] transition-all"
+                  title="Sign out and terminate session"
+                >
+                  <LogOut className="w-3.5 h-3.5 text-rt-coral" />
+                  <span className="hidden sm:inline">Logout</span>
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={onOpenLogin}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] bg-rt-primary hover:bg-yellow-300 border-2 border-rt-ink text-xs font-headline font-black text-rt-ink shadow-brutal-sm active:translate-x-[1px] active:translate-y-[1px] transition-all"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                <span>Log In</span>
+              </button>
+            )}
+
           </div>
         </div>
 
@@ -178,11 +183,6 @@ export const Navbar: React.FC<Props> = ({
               >
                 <Icon className="w-3.5 h-3.5" />
                 <span>{tab.label}</span>
-                {tab.badge && (
-                  <span className={`text-[9px] font-mono px-1 py-0.2 rounded-[2px] border border-rt-ink ${tab.badgeColor} ml-0.5`}>
-                    {tab.badge}
-                  </span>
-                )}
               </button>
             );
           })}

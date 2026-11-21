@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Navbar } from './components/Navbar';
-import { DemoTourBar } from './components/DemoTourBar';
 import { AIAssistantDrawer } from './components/AIAssistantDrawer';
 import { WorkOrderEvidenceModal } from './components/WorkOrderEvidenceModal';
 import { LoginModal } from './components/LoginModal';
@@ -164,70 +163,24 @@ const AppContent: React.FC = () => {
     }
   };
 
-  // Demo Tour Handler for 4-minute evaluation
-  const handleDemoStep = async (step: number) => {
-    switch (step) {
-      case 1: // Step 1: Citizen Landing & Ward Overview
-        setSelectedWard('K/E');
-        navigateToView(isOfficer ? 'overview' : 'citizen-home');
-        break;
-      case 2: // Step 2: Road Passport RD0140
-        setSelectedRoadId('RD0140');
-        setInvestigateMode('passport');
-        setActiveView('investigate');
-        window.location.hash = `#/passport/RD0140`;
-        break;
-      case 3: // Step 3: Entity-Specific Money Trace Graph
-        // Automatically ensure officer role for full investigation board
-        if (!isOfficer) {
-          await loginDemo('officer');
-        }
-        setSelectedRoadId('RD0140');
-        setInvestigateMode('graph');
-        setActiveView('investigate');
-        window.location.hash = `#/graph`;
-        break;
-      case 4: // Step 4: Audit Evidence Modal (WO25-00600)
-        setActiveWorkOrderId('WO25-00600');
-        break;
-      case 5: // Step 5: Officer DLP Sentinel & Contractor Scorecards
-        if (!isOfficer) {
-          await loginDemo('officer');
-        }
-        setAccountabilityTab('scorecards');
-        navigateToView('accountability');
-        break;
-      case 6: // Step 6: 7-Stage Citizen Verification & Cases
-        navigateToView(isOfficer ? 'citizen-mgmt' : 'report-issue');
-        break;
-      case 7: // Step 7: Next Rupee Planner 2.0 (Budget Simulator & IRC Materials)
-        if (!isOfficer) {
-          await loginDemo('officer');
-        }
-        setSelectedWard('K/E');
-        navigateToView('next-rupee');
-        break;
-      default:
-        break;
-    }
-  };
-
   return (
     <div className="min-h-screen bg-rt-canvas text-rt-ink flex flex-col font-body selection:bg-rt-primary selection:text-rt-ink">
       
-      {/* Top Banner: Synthetic Civic Research Data Notice */}
+      {/* Top Banner: Civic Integrity Notice */}
       <div className="bg-rt-ink text-white border-b-2 border-rt-ink text-[11px] font-mono py-1 px-4 text-center flex items-center justify-center space-x-2">
-        <span className="w-2 h-2 rounded-full bg-rt-primary animate-pulse" />
+        <span className={`w-2 h-2 rounded-full ${user ? (isOfficer ? 'bg-rt-mint' : 'bg-rt-primary') : 'bg-neutral-400'} animate-pulse`} />
         <span>
-          <strong>RUPEETRACE DEMO:</strong> Authenticated as <strong>{user?.name}</strong> ({user?.role?.toUpperCase()}). Role-based permissions actively enforced by backend.
+          {user ? (
+            <>
+              <strong>RUPEETRACE:</strong> Authenticated as <strong>{user.name}</strong> ({user.role.toUpperCase()}) &bull; Server-enforced permissions active
+            </>
+          ) : (
+            <>
+              <strong>RUPEETRACE:</strong> Public Transparency Mode &bull; Sign in to access personal activity tracker or municipal officer tools
+            </>
+          )}
         </span>
       </div>
-
-      {/* Demo Tour Toolbar */}
-      <DemoTourBar
-        onStep={handleDemoStep}
-        onOpenAssistant={() => setShowAssistant(true)}
-      />
 
       {/* Main Global Navigation */}
       <Navbar
@@ -239,7 +192,6 @@ const AppContent: React.FC = () => {
         setSearchQuery={setSearchQuery}
         onSearchSubmit={handleSearchSubmit}
         wardsList={wardsList}
-        onOpenAssistant={() => setShowAssistant(true)}
         onOpenLogin={() => setShowLoginModal(true)}
       />
 

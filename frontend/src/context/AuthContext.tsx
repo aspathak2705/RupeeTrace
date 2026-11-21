@@ -47,11 +47,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const initAuth = async () => {
       const storedToken = getAuthToken();
       if (!storedToken) {
-        // Default to demo citizen session for seamless initial experience
-        setAuthToken('demo-citizen-token');
-        setToken('demo-citizen-token');
-        setUser(DEFAULT_CITIZEN_USER);
-        setLoading(false);
+        // Create initial authentic session via backend API
+        try {
+          const res = await api.login({ demo_role: 'citizen' });
+          setToken(res.token);
+          setUser(res.user);
+        } catch (err) {
+          console.warn('Initial session auth notice:', err);
+          setAuthToken(null);
+          setToken(null);
+          setUser(null);
+        } finally {
+          setLoading(false);
+        }
         return;
       }
 
@@ -59,12 +67,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const me = await api.getMe();
         setUser(me.user);
       } catch (err) {
-        // Fallback to demo profile matching token
-        if (storedToken === 'demo-officer-token') {
-          setUser(DEFAULT_OFFICER_USER);
-        } else {
-          setUser(DEFAULT_CITIZEN_USER);
-        }
+        // Backend invalidated or expired token: clear frontend state
+        setAuthToken(null);
+        setToken(null);
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -81,12 +87,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(res.token);
       setUser(res.user);
     } catch (err: any) {
-      console.warn('API login error, setting static demo session:', err);
-      const fallbackUser = role === 'officer' ? DEFAULT_OFFICER_USER : DEFAULT_CITIZEN_USER;
-      const fallbackToken = role === 'officer' ? 'demo-officer-token' : 'demo-citizen-token';
-      setAuthToken(fallbackToken);
-      setToken(fallbackToken);
-      setUser(fallbackUser);
+      console.error('API login error:', err);
+      setError(err.message || 'Login failed');
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -111,12 +114,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await api.logout();
     } catch (err) {
-      console.error(err);
+      console.error('Backend logout error:', err);
     } finally {
-      // Revert to demo citizen session
-      setAuthToken('demo-citizen-token');
-      setToken('demo-citizen-token');
-      setUser(DEFAULT_CITIZEN_USER);
+      // Invalidate current session on backend and clear frontend state
+      setAuthToken(null);
+      setToken(null);
+      setUser(null);
     }
   };
 

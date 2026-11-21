@@ -212,15 +212,17 @@ def optimize_split_budget(
     request: Request,
     ward_prefix: str,
     ward_suffix: str,
-    body: OptimizeBudgetRequest = Body(...)
+    body: OptimizeBudgetRequest = Body(...),
+    current_user: Dict[str, Any] = Depends(require_role("officer"))
 ):
-    return optimize_budget(request, f"{ward_prefix}/{ward_suffix}", body)
+    return optimize_budget(request, f"{ward_prefix}/{ward_suffix}", body, current_user)
 
 @router.post("/simulator/{ward_code}/optimize")
 def optimize_budget(
     request: Request,
     ward_code: str = Path(...),
-    body: OptimizeBudgetRequest = Body(...)
+    body: OptimizeBudgetRequest = Body(...),
+    current_user: Dict[str, Any] = Depends(require_role("officer"))
 ):
     sim_svc = request.app.state.budget_simulator_service
     return sim_svc.optimize_budget(
@@ -323,7 +325,8 @@ def generate_cost_optimization_report(
 @router.post("/materials/ai-research")
 async def query_ai_material_research(
     request: Request,
-    body: AIResearchRequest = Body(...)
+    body: AIResearchRequest = Body(...),
+    current_user: Dict[str, Any] = Depends(require_role("officer"))
 ):
     mat_svc = request.app.state.material_intelligence_service
     return await mat_svc.query_claude_material_research(

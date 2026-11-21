@@ -1,5 +1,6 @@
 from typing import List, Dict, Any, Optional
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, Request, HTTPException, Depends
+from rupeetrace.core.auth import require_role
 
 router = APIRouter(prefix="/intelligence", tags=["ML Intelligence"])
 
@@ -131,7 +132,8 @@ def get_repair_anomalies(
     classification: Optional[str] = None,
     repair_method: Optional[str] = None,
     min_score: float = 0.0,
-    limit: int = 100
+    limit: int = 100,
+    current_user: Dict[str, Any] = Depends(require_role("officer"))
 ):
     """
     Returns work-order repair anomalies flagged by peer-grouped Isolation Forest models.
@@ -150,7 +152,8 @@ def get_repair_anomalies(
 @router.get("/anomalies/{work_order_id}")
 def get_work_order_anomaly_details(
     request: Request,
-    work_order_id: str
+    work_order_id: str,
+    current_user: Dict[str, Any] = Depends(require_role("officer"))
 ):
     """
     Returns detailed ML anomaly diagnostic for a single work order, including

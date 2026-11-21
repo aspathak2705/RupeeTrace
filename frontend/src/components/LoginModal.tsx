@@ -82,10 +82,10 @@ export const LoginModal: React.FC<Props> = ({ isOpen, onClose, requiredRole }) =
           
           <div className="text-center space-y-1">
             <h4 className="font-headline font-black text-lg text-rt-ink">
-              Choose Verified Prototype Account
+              Authenticate With Demo Identity or Credentials
             </h4>
             <p className="text-xs font-mono text-rt-secondary-text">
-              Real cryptographic session tokens are generated. Backend denies access if role is mismatched.
+              Selecting an identity issues a separate server-backed Bearer session token. Permissions are enforced by backend APIs.
             </p>
           </div>
 
@@ -107,7 +107,7 @@ export const LoginModal: React.FC<Props> = ({ isOpen, onClose, requiredRole }) =
                     <UserCheck className="w-4 h-4 text-rt-ink" />
                   </span>
                   <span className="text-[9px] font-mono font-black uppercase px-1.5 py-0.5 rounded bg-white border border-rt-ink">
-                    PUBLIC CITIZEN
+                    DEMO IDENTITY &bull; CITIZEN
                   </span>
                 </div>
                 <h5 className="font-headline font-black text-sm text-rt-ink group-hover:underline">
@@ -117,14 +117,15 @@ export const LoginModal: React.FC<Props> = ({ isOpen, onClose, requiredRole }) =
                   Ward K/E Resident &bull; Andheri East
                 </p>
                 <div className="pt-2 text-[10px] font-mono text-rt-ink space-y-1 border-t border-rt-ink/20">
-                  <div>&bull; Public Road Passport</div>
-                  <div>&bull; Grievance Filing &amp; Verification</div>
-                  <div>&bull; JANMAT Democratic Voting</div>
+                  <div>&bull; Public Road Passports</div>
+                  <div>&bull; 7-Stage Repair Photo Verification</div>
+                  <div>&bull; JANMAT Participatory Voting</div>
+                  <div>&bull; Personal Activity Tracker</div>
                 </div>
               </div>
 
               <button className="w-full py-1.5 bg-white group-hover:bg-rt-primary border-2 border-rt-ink rounded font-headline font-bold text-xs uppercase flex items-center justify-center gap-1 shadow-[1px_1px_0px_#171717]">
-                <span>Sign In as Citizen</span>
+                <span>Authenticate Citizen</span>
                 <ArrowRight className="w-3 h-3" />
               </button>
             </div>
@@ -144,7 +145,7 @@ export const LoginModal: React.FC<Props> = ({ isOpen, onClose, requiredRole }) =
                     <ShieldCheck className="w-4 h-4 text-rt-ink" />
                   </span>
                   <span className="text-[9px] font-mono font-black uppercase px-1.5 py-0.5 rounded bg-rt-mint border border-rt-ink text-rt-ink">
-                    MUNICIPAL OFFICER
+                    DEMO IDENTITY &bull; OFFICER
                   </span>
                 </div>
                 <h5 className="font-headline font-black text-sm text-rt-ink group-hover:underline">
@@ -155,13 +156,14 @@ export const LoginModal: React.FC<Props> = ({ isOpen, onClose, requiredRole }) =
                 </p>
                 <div className="pt-2 text-[10px] font-mono text-rt-ink space-y-1 border-t border-rt-ink/20">
                   <div>&bull; Money Trace Investigation Board</div>
-                  <div>&bull; DLP Sentinel &amp; Repair Auditor</div>
-                  <div>&bull; Tender Advisor &amp; Knapsack Sim</div>
+                  <div>&bull; DLP Sentinel &amp; Forensic Audits</div>
+                  <div>&bull; Contractor Scorecards &amp; Tenders</div>
+                  <div>&bull; Next Rupee Budget Optimizer</div>
                 </div>
               </div>
 
               <button className="w-full py-1.5 bg-white group-hover:bg-rt-mint border-2 border-rt-ink rounded font-headline font-bold text-xs uppercase flex items-center justify-center gap-1 shadow-[1px_1px_0px_#171717]">
-                <span>Sign In as Officer</span>
+                <span>Authenticate Officer</span>
                 <ArrowRight className="w-3 h-3" />
               </button>
             </div>

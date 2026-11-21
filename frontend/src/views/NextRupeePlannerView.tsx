@@ -7,6 +7,7 @@ import {
   ChevronRight, RefreshCw, BarChart3, Scale, HardHat, FileText,
   AlertTriangle, ShieldCheck, Eye, Upload, ThumbsUp, X, Filter
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import { api } from '../api/client';
 import {
   WardSummary, CivicProposal, SimulatorWardResponse, BudgetScenarioResult,
@@ -31,18 +32,19 @@ export const NextRupeePlannerView: React.FC<NextRupeePlannerViewProps> = ({
   onNavigateToMoneyTrail
 }) => {
   // Navigation & Sub-Tabs
+  const { user, isOfficer } = useAuth();
   const [activeTab, setActiveTab] = useState<'janmat' | 'simulator' | 'contractors' | 'materials' | 'verification' | 'optimizer'>('janmat');
   const [wardCode, setWardCode] = useState<string>(initialWard);
   const [wards, setWards] = useState<WardSummary[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Authenticated demo user
-  const [demoUser, setDemoUser] = useState<{ id: string; name: string; role: 'citizen' | 'officer' }>({
-    id: role === 'officer' ? 'officer_deshmukh' : 'citizen_priya',
-    name: role === 'officer' ? 'Er. V. Deshmukh (Assistant Engineer)' : 'Priya Mehta (Resident Parent)',
-    role: role
-  });
+  // Authenticated user from session
+  const demoUser = useMemo(() => ({
+    id: user?.username || 'officer',
+    name: user?.name || (isOfficer ? 'Er. R. K. Patil' : 'Sunita Sharma'),
+    role: (user?.role || role || 'officer') as 'citizen' | 'officer'
+  }), [user, isOfficer, role]);
 
   // Data Collections
   const [proposals, setProposals] = useState<CivicProposal[]>([]);
@@ -392,24 +394,10 @@ export const NextRupeePlannerView: React.FC<NextRupeePlannerViewProps> = ({
           </span>
         </div>
         <div className="flex items-center space-x-2">
-          <span className="text-rt-secondary-text">Actor:</span>
+          <span className="text-rt-secondary-text">Authenticated Session:</span>
           <span className="font-bold bg-white px-2 py-0.5 border border-rt-ink rounded">
             {demoUser.name} ({demoUser.role.toUpperCase()})
           </span>
-          <button
-            onClick={() => setDemoUser(prev => prev.role === 'citizen' ? {
-              id: 'officer_deshmukh',
-              name: 'Er. V. Deshmukh (Assistant Engineer, K/E)',
-              role: 'officer'
-            } : {
-              id: 'citizen_priya',
-              name: 'Priya Mehta (Parent Council Resident)',
-              role: 'citizen'
-            })}
-            className="text-[10px] bg-rt-ink text-white px-2 py-0.5 rounded hover:bg-neutral-800 font-bold"
-          >
-            Switch Role
-          </button>
         </div>
       </div>
 
