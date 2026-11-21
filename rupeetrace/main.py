@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from rupeetrace.core.config import settings
 from rupeetrace.data.data_loader import DataLoader
@@ -20,8 +21,14 @@ from rupeetrace.services.graph_service import GraphService
 from rupeetrace.services.assistant_service import AssistantService
 from rupeetrace.services.ml_issue_service import MLIssueService
 from rupeetrace.services.ml_anomaly_service import MLAnomalyService
+from rupeetrace.services.janmat_service import JanmatService
+from rupeetrace.services.budget_simulator_service import BudgetSimulatorService
+from rupeetrace.services.contractor_intelligence_service import ContractorIntelligenceService
+from rupeetrace.services.material_intelligence_service import MaterialIntelligenceService
+from rupeetrace.services.citizen_verification_service import CitizenVerificationService
+from rupeetrace.services.civic_value_optimizer_service import CivicValueOptimizerService
 
-from rupeetrace.api.routes import health, wards, roads, work_orders, audits, contractors, graph, cases, assistant, intelligence
+from rupeetrace.api.routes import health, wards, roads, work_orders, audits, contractors, graph, cases, assistant, intelligence, civic
 
 def init_app_state(app: FastAPI):
     """Synchronously populates app.state so all routers and tests are immediately operational."""
@@ -55,6 +62,21 @@ def init_app_state(app: FastAPI):
         ml_anomaly_service=app.state.ml_anomaly_service
     )
     app.state.assistant_service = AssistantService(rel_service)
+
+    # Next Rupee Planner 2.0 Civic Intelligence Engines
+    app.state.janmat_service = JanmatService(rel_service)
+    app.state.budget_simulator_service = BudgetSimulatorService(rel_service, app.state.janmat_service)
+    app.state.contractor_intelligence_service = ContractorIntelligenceService(rel_service, app.state.janmat_service)
+    app.state.material_intelligence_service = MaterialIntelligenceService()
+    app.state.citizen_verification_service = CitizenVerificationService(rel_service)
+    app.state.civic_value_optimizer_service = CivicValueOptimizerService(
+        rel_service=rel_service,
+        janmat_service=app.state.janmat_service,
+        budget_service=app.state.budget_simulator_service,
+        contractor_service=app.state.contractor_intelligence_service,
+        material_service=app.state.material_intelligence_service,
+        verification_service=app.state.citizen_verification_service
+    )
 
     # Pre-cache audit findings
     app.state.audit_service.get_all_findings(limit=1)
@@ -95,6 +117,12 @@ app.include_router(graph.router, prefix=settings.API_PREFIX)
 app.include_router(cases.router, prefix=settings.API_PREFIX)
 app.include_router(assistant.router, prefix=settings.API_PREFIX)
 app.include_router(intelligence.router, prefix=settings.API_PREFIX)
+app.include_router(civic.router, prefix=settings.API_PREFIX)
+
+# Static file serving for evidence uploads
+uploads_path = settings.BASE_DIR / "rupeetrace" / "data" / "uploads"
+os.makedirs(uploads_path, exist_ok=True)
+app.mount("/api/uploads", StaticFiles(directory=str(uploads_path)), name="uploads")
 
 @app.get("/")
 def root():

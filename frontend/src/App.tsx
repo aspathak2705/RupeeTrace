@@ -229,6 +229,8 @@ export const App: React.FC = () => {
         {activeView === 'next-rupee' && (
           <NextRupeePlannerView
             initialWard={selectedWard}
+            initialRoadId={selectedRoadId}
+            role={role}
             onOpenPassport={handleOpenPassport}
             onNavigateToMoneyTrail={(code) => {
               setSelectedWard(code);

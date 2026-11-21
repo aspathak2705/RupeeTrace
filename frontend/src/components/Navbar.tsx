@@ -134,7 +134,7 @@ export const Navbar: React.FC<Props> = ({
             { id: 'graph', label: 'Visual Money Trace Graph', icon: GitBranch, badge: 'SIGNATURE', badgeColor: 'bg-rt-mint' },
             { id: 'audits', label: 'Repair Auditor', icon: ShieldAlert },
             { id: 'contractors', label: 'Contractor Scorecards', icon: Users },
-            { id: 'next-rupee', label: 'Next Rupee Planner', icon: Award },
+            { id: 'next-rupee', label: 'Next Rupee & JANMAT', icon: Award, badge: 'PLANNER 2.0', badgeColor: 'bg-rt-primary' },
             { id: 'cases', label: 'Cases & Observations', icon: MessageSquare }
           ].map(tab => {
             const Icon = tab.icon;

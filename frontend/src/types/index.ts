@@ -437,3 +437,301 @@ export interface CaseRecord {
     action: string;
   }>;
 }
+
+// ==========================================
+// NEXT RUPEE PLANNER 2.0 CIVIC INTELLIGENCE TYPES
+// ==========================================
+
+export interface CivicProposalScoreFactors {
+  public_priority: number;
+  infrastructure_urgency: number;
+  safety_impact: number;
+  facility_accessibility_impact: number;
+  financial_feasibility: number;
+  technical_feasibility: number;
+  environmental_flood_resilience: number;
+  evidence_confidence: number;
+}
+
+export interface CivicProposal {
+  proposal_id: string;
+  ward_code: string;
+  locality: string;
+  category: string;
+  title: string;
+  problem_statement: string;
+  generation_reason: string;
+  related_road_id: string;
+  related_road_name: string;
+  supporting_complaint_ids: string[];
+  nearby_facilities: Array<{ id: string; name: string; type: string }>;
+  flood_context: {
+    ward_low_lying_index?: number;
+    hotspots_count?: number;
+    nearest_hotspot?: string | null;
+  };
+  traffic_context: {
+    congestion_index?: number | null;
+    bus_route?: boolean;
+    road_type?: string;
+  };
+  historical_work_orders_count: number;
+  indicative_cost_inr: number;
+  estimated_duration_days: number;
+  expected_public_benefit: string;
+  risks_dependencies: string;
+  source_record_ids: string[];
+  confidence_score: number;
+  evidence_completeness_pct: number;
+  under_dlp: boolean | number;
+  dlp_investigation_flag: boolean | number;
+  dlp_contractor_id?: string | null;
+  dlp_notice?: string | null;
+  score_factors: CivicProposalScoreFactors;
+  composite_score: number;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+  votes_total?: number;
+  votes_up?: number;
+  comments_count?: number;
+  votes?: Array<{ user_id: string; vote_type: string; updated_at: string }>;
+  comments?: Array<{
+    comment_id: string;
+    proposal_id: string;
+    user_id: string;
+    user_name: string;
+    user_role: string;
+    comment_text: string;
+    created_at: string;
+  }>;
+  lifecycle_history?: Array<{
+    id: number;
+    proposal_id: string;
+    previous_status: string;
+    new_status: string;
+    actor: string;
+    reason: string;
+    supporting_evidence?: string;
+    timestamp: string;
+  }>;
+  cost_breakdown?: {
+    total_estimated_cost_inr: number;
+    raw_materials_inr: number;
+    labour_inr: number;
+    equipment_machinery_inr: number;
+    transport_logistics_inr: number;
+    testing_quality_assurance_inr: number;
+    contingency_reserve_inr: number;
+    annual_maintenance_est_inr: number;
+  };
+}
+
+export interface BudgetScenarioResult {
+  scenario_name: string;
+  spendable_budget_inr: number;
+  contingency_reserved_inr: number;
+  total_allocated_inr: number;
+  unallocated_surplus_inr: number;
+  budget_utilization_pct: number;
+  selected_projects_count: number;
+  unselected_projects_count: number;
+  selected_proposals: CivicProposal[];
+  unselected_proposals: Array<{
+    proposal_id: string;
+    title: string;
+    cost_inr: number;
+    reason_not_selected: string;
+  }>;
+  impact_metrics: {
+    hospitals_accessible_benefited: number;
+    schools_accessible_benefited: number;
+    citizen_complaints_resolved_count: number;
+    safety_outcomes_score: number;
+    flood_resilience_score: number;
+    est_annual_maintenance_burden_inr: number;
+    dlp_avoidance_savings_inr: number;
+  };
+}
+
+export interface SimulatorWardResponse {
+  ward_code: string;
+  ward_name: string;
+  total_budget_inr: number;
+  remaining_official_ward_budget_inr: number;
+  contingency_reserve_pct: number;
+  total_available_proposals_count: number;
+  scenarios: Record<string, BudgetScenarioResult>;
+  custom_saved_scenarios: any[];
+}
+
+export interface ContractorComparisonItem {
+  contractor_id: string;
+  contractor_name: string;
+  empanelled_since: number;
+  is_active_in_ward: boolean;
+  has_sufficient_data: boolean;
+  data_gap_warning?: string | null;
+  category_jobs_done: number;
+  avg_job_cost_inr: number;
+  sla_compliance_pct: number | null;
+  reopen_frequency_pct: number | null;
+  dlp_breaches_count: number;
+  total_workload_jobs: number;
+  suitability_dimensions: {
+    technical_suitability: number;
+    comparable_experience: number;
+    delivery_reliability: number;
+    quality_evidence: number;
+    cost_competitiveness: number;
+  };
+  overall_suitability_score: number;
+  suitability_verdict: string;
+}
+
+export interface ProposalContractorComparison {
+  proposal_id: string;
+  proposal_title: string;
+  ward_code: string;
+  target_engineering_category: string;
+  indicative_budget_inr: number;
+  under_dlp: boolean;
+  comparisons: ContractorComparisonItem[];
+  evaluation_notice: string;
+}
+
+export interface EvaluatedBid {
+  bidder_id: string;
+  contractor_name: string;
+  quoted_amount_inr: number;
+  variance_from_estimate_pct: number;
+  proposed_duration_days: number;
+  warranty_months: number;
+  is_eligible: boolean;
+  disqualification_reasons: string[];
+  scores: {
+    financial_score: number;
+    technical_score: number;
+    delivery_score: number;
+    warranty_score: number;
+  };
+  composite_evaluation_score: number;
+  rank?: string | null;
+}
+
+export interface TenderEvaluationResponse {
+  tender_id: string;
+  proposal_id: string;
+  project_scope: string;
+  indicative_base_cost_inr: number;
+  criteria: any;
+  evaluated_bids: EvaluatedBid[];
+  recommended_bidder?: EvaluatedBid | null;
+  disclaimer: string;
+}
+
+export interface MaterialAlternativeItem {
+  alternative_code: string;
+  title: string;
+  standard_reference: string;
+  initial_capex_inr: number;
+  capex_difference_inr: number;
+  capex_savings_pct: number;
+  five_year_lifecycle_cost_inr: number;
+  lifecycle_savings_pct: number;
+  lifespan_years: number;
+  monsoon_flooding_resilience: number;
+  heavy_axle_load_rating: number;
+  skid_resistance_bpn: number;
+  technical_trade_off: string;
+  appropriate_conditions: string;
+}
+
+export interface CostOptimizationReport {
+  project_category: string;
+  baseline_option: {
+    title: string;
+    standard_reference: string;
+    baseline_cost_inr: number;
+    lifespan_years: number;
+    five_year_lifecycle_cost_inr: number;
+  };
+  best_lifecycle_value_recommendation: {
+    title: string;
+    standard_reference: string;
+    lifecycle_savings_pct: number;
+    rationale: string;
+  };
+  alternatives_evaluated: MaterialAlternativeItem[];
+  disclaimer: string;
+}
+
+export interface VerificationEvidenceItem {
+  report_id: string;
+  road_id: string;
+  work_order_id?: string | null;
+  proposal_id?: string | null;
+  stage: string;
+  evidence_type: string;
+  image_url: string;
+  submitter_id: string;
+  submitter_role: string;
+  verification_action: string;
+  observation_text: string;
+  gps_lat?: number | null;
+  gps_lon?: number | null;
+  conflict_flag: boolean | number;
+  status: string;
+  officer_notes?: string | null;
+  created_at: string;
+}
+
+export interface RoadVerificationSummary {
+  road_id: string;
+  road_name: string;
+  ward_code: string;
+  under_dlp: boolean;
+  overall_verification_status: string;
+  has_discrepancy_conflict: boolean;
+  active_conflicts: VerificationEvidenceItem[];
+  verification_stages: Array<{
+    stage_no: number;
+    name: string;
+    status: string;
+    count?: number;
+  }>;
+  before_after_comparison: {
+    before?: {
+      source: string;
+      id: string;
+      description: string;
+      category: string;
+      photo_url: string;
+      date: string;
+    } | null;
+    after?: {
+      source: string;
+      id: string;
+      description: string;
+      verification_action: string;
+      photo_url: string;
+      date: string;
+      is_conflict: boolean;
+    } | null;
+  };
+  all_evidence_reports: VerificationEvidenceItem[];
+}
+
+export interface UnifiedInvestmentBrief {
+  proposal_id: string;
+  title: string;
+  category: string;
+  ward_code: string;
+  road_id: string;
+  road_name: string;
+  status: string;
+  composite_score: number;
+  answers_to_13_questions: Record<string, any>;
+  provenance_statement: string;
+}

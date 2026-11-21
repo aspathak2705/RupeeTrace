@@ -3,7 +3,7 @@ import {
   Compass, QrCode, GitBranch, ShieldAlert, CheckCircle2, Clock,
   AlertTriangle, FileText, ArrowRight, Activity, Building, MapPin,
   ExternalLink, Calendar, Car, AlertOctagon, HeartHandshake, Eye, Printer,
-  Sparkles, MessageSquare, Layers, Cpu
+  Sparkles, MessageSquare, Layers, Cpu, Vote
 } from 'lucide-react';
 import { RoadDetail, Complaint, WorkOrder, RoadFinancialHistory, AuditFinding, CaseRecord } from '../types';
 import { api } from '../api/client';
@@ -180,6 +180,16 @@ export const RoadPassportView: React.FC<Props> = ({
             >
               <GitBranch className="w-4 h-4 text-rt-ink" />
               <span>Trace Money Graph</span>
+            </button>
+
+            <button
+              onClick={() => {
+                window.location.hash = '#/next-rupee';
+              }}
+              className="flex items-center gap-2 px-4 py-2.5 text-xs font-headline font-bold rounded-[4px] bg-rt-mint hover:bg-teal-300 text-rt-ink border-2 border-rt-ink shadow-brutal-sm hover:shadow-brutal active:translate-x-[1px] active:translate-y-[1px] transition-all"
+            >
+              <Vote className="w-4 h-4 text-rt-ink" />
+              <span>Verify & Next Rupee</span>
             </button>
           </div>
         </div>
