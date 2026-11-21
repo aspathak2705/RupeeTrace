@@ -81,6 +81,7 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
   const [graphData, setGraphData] = useState<GraphData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [includeML, setIncludeML] = useState<boolean>(false);
 
   // Filter toggles
   const [activeCategories, setActiveCategories] = useState<Record<string, boolean>>({
@@ -111,14 +112,15 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
   const svgRef = useRef<SVGSVGElement | null>(null);
 
   // Fetch graph data
-  const loadGraph = async (type: 'road' | 'work_order' | 'ward', id: string) => {
+  const loadGraph = async (type: 'road' | 'work_order' | 'ward', id: string, mlEnabled: boolean = includeML) => {
     try {
       setLoading(true);
       setError(null);
       setSelectedNode(null);
 
-      const params: { road_id?: string; work_order_id?: string; ward_code?: string; max_work_orders: number } = {
-        max_work_orders: 8
+      const params: { road_id?: string; work_order_id?: string; ward_code?: string; max_work_orders: number; include_ml: boolean } = {
+        max_work_orders: 8,
+        include_ml: mlEnabled
       };
       if (type === 'road') params.road_id = id;
       if (type === 'work_order') params.work_order_id = id;
@@ -372,6 +374,25 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
               </button>
             );
           })}
+
+          {/* Model-suggested ML edge toggle */}
+          <button
+            onClick={() => {
+              const next = !includeML;
+              setIncludeML(next);
+              loadGraph(focusType, focusId, next);
+            }}
+            className={`px-2.5 py-1 rounded-[3px] border-2 border-rt-ink text-[11px] font-mono font-bold flex items-center space-x-1.5 transition-all shadow-[1.5px_1.5px_0px_#171717] ${
+              includeML
+                ? 'bg-rt-primary text-rt-ink'
+                : 'bg-white text-rt-secondary-text hover:bg-rt-canvas'
+            }`}
+          >
+            <span>⚡ ML Edges</span>
+            <span className={`text-[9px] px-1 rounded border border-rt-ink ${includeML ? 'bg-rt-ink text-white' : 'bg-rt-muted text-rt-ink'}`}>
+              {includeML ? 'ON' : 'OFF'}
+            </span>
+          </button>
         </div>
 
         {graphData && (
@@ -486,6 +507,7 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
 
                   const isConnectedToSelected =
                     selectedNode && (edge.source === selectedNode.id || edge.target === selectedNode.id);
+                  const isModelSuggested = (edge as any).provenance_status === 'model-suggested';
 
                   const midX = (sPos.x + tPos.x) / 2;
                   const midY = (sPos.y + tPos.y) / 2;
@@ -497,32 +519,32 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
                         y1={sPos.y}
                         x2={tPos.x}
                         y2={tPos.y}
-                        stroke="#171717"
-                        strokeWidth={isConnectedToSelected ? 3 : 1.8}
-                        strokeDasharray={edge.relation_type.includes('audit') ? '4 3' : 'none'}
+                        stroke={isModelSuggested ? '#F06A4D' : '#171717'}
+                        strokeWidth={isConnectedToSelected ? 3 : isModelSuggested ? 2.2 : 1.8}
+                        strokeDasharray={isModelSuggested ? '5 4' : edge.relation_type.includes('audit') ? '4 3' : 'none'}
                         markerEnd={isConnectedToSelected ? 'url(#arrow-active)' : 'url(#arrow-default)'}
                       />
-                      {isConnectedToSelected && (
+                      {(isConnectedToSelected || isModelSuggested) && (
                         <g transform={`translate(${midX}, ${midY})`}>
                           <rect
-                            x={-45}
+                            x={-50}
                             y={-10}
-                            width={90}
+                            width={100}
                             height={20}
                             rx={3}
-                            fill="#F4D63D"
+                            fill={isModelSuggested ? '#B9D9D1' : '#F4D63D'}
                             stroke="#171717"
                             strokeWidth={1.5}
                           />
                           <text
                             textAnchor="middle"
                             dy={4}
-                            fontSize={9}
+                            fontSize={8.5}
                             fontWeight="bold"
                             fill="#171717"
                             className="font-mono select-none"
                           >
-                            {edge.label.length > 15 ? edge.label.substring(0, 13) + '…' : edge.label}
+                            {isModelSuggested ? `[ML] ${edge.label}` : edge.label.length > 15 ? edge.label.substring(0, 13) + '…' : edge.label}
                           </text>
                         </g>
                       )}

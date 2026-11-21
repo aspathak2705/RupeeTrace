@@ -16,6 +16,7 @@ class AuditService:
         contractor_id: Optional[str] = None,
         status: Optional[str] = None,
         severity: Optional[str] = None,
+        provenance_type: Optional[str] = None,
         limit: int = 200
     ) -> List[Dict[str, Any]]:
         """
@@ -39,8 +40,54 @@ class AuditService:
             results = [f for f in results if f["status"] == status]
         if severity:
             results = [f for f in results if f["severity"] == severity]
+        if provenance_type:
+            results = [f for f in results if f.get("provenance_type") == provenance_type]
 
         return results[:limit]
+
+    def get_combined_findings(
+        self,
+        ml_anomaly_service = None,
+        ward_code: Optional[str] = None,
+        road_id: Optional[str] = None,
+        limit: int = 200
+    ) -> List[Dict[str, Any]]:
+        """
+        Combines deterministic rule findings with statistical metrics and ML IsolationForest anomalies.
+        Provides distinct provenance tags: [Deterministic], [Statistical], and [ML IsolationForest].
+        """
+        det_limit = max(10, limit // 2) if ml_anomaly_service is not None else limit
+        findings = list(self.get_all_findings(ward_code=ward_code, road_id=road_id, limit=det_limit))
+
+        if ml_anomaly_service is not None:
+            ml_limit = max(10, limit - len(findings))
+            anomalies = ml_anomaly_service.get_anomalies(ward_code=ward_code, road_id=road_id, min_score=0.45, limit=ml_limit)
+            for a in anomalies:
+                findings.append({
+                    "finding_id": f"AUD-ML-{a['work_order_id']}",
+                    "finding_type": "ML_REPAIR_ANOMALY",
+                    "severity": "HIGH" if a["anomaly_score"] >= 0.70 else "MEDIUM",
+                    "status": "High priority review" if a["anomaly_score"] >= 0.70 else "Needs review",
+                    "ward_code": a["ward_code"],
+                    "road_id": a["road_id"],
+                    "work_order_id": a["work_order_id"],
+                    "contractor_id": a["contractor_id"],
+                    "source_records": [
+                        {"file": "work_orders.csv", "id": a["work_order_id"]}
+                    ],
+                    "calculation": {
+                        "anomaly_score": a["anomaly_score"],
+                        "classification": a["classification"],
+                        "peer_group_size": a["peer_group_size"],
+                        "differentiating_features": a["differentiating_features"]
+                    },
+                    "reason": f"Isolation Forest identified {a['classification'].lower()} (score: {a['anomaly_score']:.2f}) within peer group '{a['repair_method']}'.",
+                    "limitations": "Unusual statistical profile does not prove defect or overbilling; requires physical measurement sheet review.",
+                    "provenance_type": "[ML IsolationForest]",
+                    "recommended_action": a["recommended_action"]
+                })
+
+        return findings[:limit]
 
     def get_finding_by_id(self, finding_id: str) -> Optional[Dict[str, Any]]:
         if self._cached_findings is None:
@@ -113,6 +160,7 @@ class AuditService:
                         "Screening threshold based on synthetic rate-card schedule. Normal field variance may reflect "
                         "specialized ground preparation, water pumping or subsurface pipe reinforcement."
                     ),
+                    "provenance_type": "[Deterministic]",
                     "recommended_action": (
                         "Review measurement book and on-site itemized measurement sheets with ward executive engineer."
                     )
@@ -198,6 +246,7 @@ class AuditService:
                             "Work orders may address distinct potholes or road chainages along the same road segment. "
                             "Candidate duplicate screening does not prove redundant billing."
                         ),
+                        "provenance_type": "[Deterministic]",
                         "recommended_action": (
                             "Inspect road chainage log and GPS coordinates in contractor work completion certificate."
                         )
@@ -235,6 +284,7 @@ class AuditService:
                         "Certain utility trench cuts, third-party pipeline bursts or emergency traffic police directives "
                         "may warrant BMC emergency expenditure outside original contractor warranty scope."
                     ),
+                    "provenance_type": "[Deterministic]",
                     "recommended_action": (
                         "Verify whether original resurfacing contractor was notified to rectify under warranty terms "
                         "before issuing payment."
@@ -276,6 +326,7 @@ class AuditService:
                         "Rapid failure may result from heavy waterlogging, high-tide submergence, or structural subgrade "
                         "weakness rather than poor asphalt binder quality."
                     ),
+                    "provenance_type": "[Deterministic]",
                     "recommended_action": (
                         "Evaluate environmental flood context and review contractor defect liability hold-back guarantee."
                     )
@@ -310,6 +361,7 @@ class AuditService:
                     "limitations": (
                         "Continuous heavy monsoon rainfall or traffic police work permits may delay asphalt laying."
                     ),
+                    "provenance_type": "[Deterministic]",
                     "recommended_action": (
                         "Cross-reference rainfall log on assignment dates to determine if force majeure applies."
                     )

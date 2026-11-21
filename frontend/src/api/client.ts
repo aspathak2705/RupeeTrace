@@ -130,15 +130,77 @@ export const api = {
     work_order_id?: string;
     ward_code?: string;
     max_work_orders?: number;
+    include_ml?: boolean;
   }): Promise<GraphData> => {
     const q = new URLSearchParams();
     if (params?.road_id) q.append('road_id', params.road_id);
     if (params?.work_order_id) q.append('work_order_id', params.work_order_id);
     if (params?.ward_code) q.append('ward_code', params.ward_code);
     if (params?.max_work_orders) q.append('max_work_orders', String(params.max_work_orders));
+    if (params?.include_ml) q.append('include_ml', 'true');
 
     const res = await fetch(`${API_BASE}/graph?${q.toString()}`);
     if (!res.ok) throw new Error('Failed to fetch graph data');
+    return res.json();
+  },
+
+  // ML Intelligence Layer
+  getRoadMLSignals: async (roadId: string): Promise<any> => {
+    const res = await fetch(`${API_BASE}/intelligence/roads/${encodeURIComponent(roadId)}/signals`);
+    if (!res.ok) throw new Error(`Failed to fetch ML signals for road ${roadId}`);
+    return res.json();
+  },
+
+  getIncidentClusters: async (params?: {
+    ward_code?: string;
+    road_id?: string;
+    limit?: number;
+  }): Promise<any[]> => {
+    const q = new URLSearchParams();
+    if (params?.ward_code) q.append('ward_code', params.ward_code);
+    if (params?.road_id) q.append('road_id', params.road_id);
+    if (params?.limit) q.append('limit', String(params.limit));
+
+    const res = await fetch(`${API_BASE}/intelligence/issues/clusters?${q.toString()}`);
+    if (!res.ok) throw new Error('Failed to fetch incident clusters');
+    return res.json();
+  },
+
+  getRepairAnomalies: async (params?: {
+    ward_code?: string;
+    road_id?: string;
+    classification?: string;
+    limit?: number;
+  }): Promise<any[]> => {
+    const q = new URLSearchParams();
+    if (params?.ward_code) q.append('ward_code', params.ward_code);
+    if (params?.road_id) q.append('road_id', params.road_id);
+    if (params?.classification) q.append('classification', params.classification);
+    if (params?.limit) q.append('limit', String(params.limit));
+
+    const res = await fetch(`${API_BASE}/intelligence/anomalies?${q.toString()}`);
+    if (!res.ok) throw new Error('Failed to fetch repair anomalies');
+    return res.json();
+  },
+
+  getWorkOrderAnomaly: async (woId: string): Promise<any> => {
+    const res = await fetch(`${API_BASE}/intelligence/anomalies/${encodeURIComponent(woId)}`);
+    if (!res.ok) throw new Error(`Failed to fetch anomaly diagnostic for ${woId}`);
+    return res.json();
+  },
+
+  getSocialSignals: async (params?: {
+    ward_code?: string;
+    only_actionable?: boolean;
+    limit?: number;
+  }): Promise<any[]> => {
+    const q = new URLSearchParams();
+    if (params?.ward_code) q.append('ward_code', params.ward_code);
+    if (params?.only_actionable !== undefined) q.append('only_actionable', String(params.only_actionable));
+    if (params?.limit) q.append('limit', String(params.limit));
+
+    const res = await fetch(`${API_BASE}/intelligence/social-signals?${q.toString()}`);
+    if (!res.ok) throw new Error('Failed to fetch social signals');
     return res.json();
   },
 

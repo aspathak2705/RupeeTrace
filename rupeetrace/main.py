@@ -18,8 +18,10 @@ from rupeetrace.services.next_rupee_service import NextRupeeService
 from rupeetrace.services.case_service import CaseService
 from rupeetrace.services.graph_service import GraphService
 from rupeetrace.services.assistant_service import AssistantService
+from rupeetrace.services.ml_issue_service import MLIssueService
+from rupeetrace.services.ml_anomaly_service import MLAnomalyService
 
-from rupeetrace.api.routes import health, wards, roads, work_orders, audits, contractors, graph, cases, assistant
+from rupeetrace.api.routes import health, wards, roads, work_orders, audits, contractors, graph, cases, assistant, intelligence
 
 def init_app_state(app: FastAPI):
     """Synchronously populates app.state so all routers and tests are immediately operational."""
@@ -45,7 +47,13 @@ def init_app_state(app: FastAPI):
     app.state.accountability_service = AccountabilityService(rel_service)
     app.state.next_rupee_service = NextRupeeService(rel_service)
     app.state.case_service = CaseService()
-    app.state.graph_service = GraphService(rel_service)
+    app.state.ml_issue_service = MLIssueService(rel_service)
+    app.state.ml_anomaly_service = MLAnomalyService(rel_service)
+    app.state.graph_service = GraphService(
+        rel_service,
+        ml_issue_service=app.state.ml_issue_service,
+        ml_anomaly_service=app.state.ml_anomaly_service
+    )
     app.state.assistant_service = AssistantService(rel_service)
 
     # Pre-cache audit findings
@@ -85,6 +93,7 @@ app.include_router(contractors.router, prefix=settings.API_PREFIX)
 app.include_router(graph.router, prefix=settings.API_PREFIX)
 app.include_router(cases.router, prefix=settings.API_PREFIX)
 app.include_router(assistant.router, prefix=settings.API_PREFIX)
+app.include_router(intelligence.router, prefix=settings.API_PREFIX)
 
 @app.get("/")
 def root():

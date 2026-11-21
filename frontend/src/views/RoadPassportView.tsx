@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import {
   Compass, QrCode, GitBranch, ShieldAlert, CheckCircle2, Clock,
   AlertTriangle, FileText, ArrowRight, Activity, Building, MapPin,
-  ExternalLink, Calendar, Car, AlertOctagon, HeartHandshake, Eye, Printer
+  ExternalLink, Calendar, Car, AlertOctagon, HeartHandshake, Eye, Printer,
+  Sparkles, MessageSquare, Layers, Cpu
 } from 'lucide-react';
 import { RoadDetail, Complaint, WorkOrder, RoadFinancialHistory, AuditFinding, CaseRecord } from '../types';
 import { api } from '../api/client';
@@ -27,6 +28,7 @@ export const RoadPassportView: React.FC<Props> = ({
   const [history, setHistory] = useState<RoadFinancialHistory | null>(null);
   const [auditFindings, setAuditFindings] = useState<AuditFinding[]>([]);
   const [cases, setCases] = useState<CaseRecord[]>([]);
+  const [mlSignals, setMlSignals] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showQRModal, setShowQRModal] = useState(false);
@@ -40,14 +42,16 @@ export const RoadPassportView: React.FC<Props> = ({
       api.getRoadComplaints(roadId),
       api.getRoadFinancialHistory(roadId),
       api.getAuditFindings({ road_id: roadId }),
-      api.getCases({ road_id: roadId })
+      api.getCases({ road_id: roadId }),
+      api.getRoadMLSignals(roadId).catch(() => null)
     ])
-      .then(([roadData, compData, histData, auditData, caseData]) => {
+      .then(([roadData, compData, histData, auditData, caseData, mlData]) => {
         setRoad(roadData);
         setComplaints(compData);
         setHistory(histData);
         setAuditFindings(auditData);
         setCases(caseData);
+        setMlSignals(mlData);
       })
       .catch(err => setError(err.message))
       .finally(() => setLoading(false));
@@ -221,7 +225,8 @@ export const RoadPassportView: React.FC<Props> = ({
           { num: 3, name: '03 REPAIRS & SCOPE' },
           { num: 4, name: '04 MONEY HISTORY' },
           { num: 5, name: '05 DURABILITY' },
-          { num: 6, name: '06 CASES & ACTIONS' }
+          { num: 6, name: '06 CASES & ACTIONS' },
+          { num: 7, name: '07 ML INTELLIGENCE' }
         ].map(ch => (
           <button
             key={ch.num}
@@ -540,6 +545,238 @@ export const RoadPassportView: React.FC<Props> = ({
                     )}
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* CHAPTER 7 — ML Intelligence & Issue Signals */}
+        {activeChapter === 7 && (
+          <div className="p-6 bg-white border-3 border-rt-ink rounded-[6px] shadow-brutal space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-rt-ink pb-4">
+              <div>
+                <h2 className="text-lg font-headline font-black text-rt-ink uppercase tracking-wider flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-rt-ink" />
+                  Chapter 07 — ML Issue & Repair Anomaly Intelligence
+                </h2>
+                <p className="text-xs font-mono text-rt-secondary-text mt-0.5">
+                  Lightweight local ML models discovering cross-lingual incident patterns and peer-group repair deviations.
+                </p>
+              </div>
+              <span className="self-start sm:self-auto text-[11px] font-mono font-bold uppercase bg-rt-mint px-2.5 py-1 rounded border-2 border-rt-ink text-rt-ink shadow-brutal-sm">
+                Dual Engine Active (Model A + B)
+              </span>
+            </div>
+
+            {/* Quick Stat Summary Strip */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 text-xs font-mono">
+              <div className="p-3 bg-rt-canvas border-2 border-rt-ink rounded-[3px] shadow-brutal-sm">
+                <span className="text-[10px] text-rt-secondary-text uppercase font-bold block">Incident Clusters</span>
+                <span className="text-xl font-headline font-black text-rt-ink block mt-0.5">
+                  {mlSignals?.incident_clusters_count ?? 0}
+                </span>
+                <span className="text-[10px] text-rt-secondary-text mt-1 block">Cross-lingual unified</span>
+              </div>
+              <div className="p-3 bg-rt-canvas border-2 border-rt-ink rounded-[3px] shadow-brutal-sm">
+                <span className="text-[10px] text-rt-secondary-text uppercase font-bold block">Candidate Duplicates</span>
+                <span className="text-xl font-headline font-black text-rt-ink block mt-0.5">
+                  {mlSignals?.duplicate_candidates_count ?? 0}
+                </span>
+                <span className="text-[10px] text-rt-secondary-text mt-1 block">&le;250m &bull; &le;72h</span>
+              </div>
+              <div className="p-3 bg-rt-primary border-2 border-rt-ink rounded-[3px] shadow-brutal-sm">
+                <span className="text-[10px] text-rt-ink uppercase font-bold block">Anomaly Screening</span>
+                <span className="text-xl font-headline font-black text-rt-ink block mt-0.5">
+                  {mlSignals?.repair_anomaly_summary?.high_priority_candidates ?? 0} High / {mlSignals?.repair_anomaly_summary?.unusual_patterns ?? 0} Unusual
+                </span>
+                <span className="text-[10px] text-rt-ink mt-1 block">Isolation Forest peer check</span>
+              </div>
+              <div className="p-3 bg-rt-canvas border-2 border-rt-ink rounded-[3px] shadow-brutal-sm">
+                <span className="text-[10px] text-rt-secondary-text uppercase font-bold block">Social Signals</span>
+                <span className="text-xl font-headline font-black text-rt-ink block mt-0.5">
+                  {mlSignals?.actionable_social_signals?.length ?? 0}
+                </span>
+                <span className="text-[10px] text-rt-secondary-text mt-1 block">Filtered road hazards</span>
+              </div>
+            </div>
+
+            {/* Section 1: Model A Incident Clusters */}
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-headline font-black uppercase text-rt-ink flex items-center gap-1.5">
+                  <Layers className="w-4 h-4 text-rt-ink" />
+                  Model A &bull; Cross-Lingual Incident Clusters
+                </h3>
+                <span className="text-[10px] font-mono text-rt-secondary-text">Paraphrase Multilingual 384-dim</span>
+              </div>
+
+              {!mlSignals?.incident_clusters || mlSignals.incident_clusters.length === 0 ? (
+                <div className="p-4 bg-rt-canvas border border-rt-ink rounded text-xs font-mono text-rt-secondary-text">
+                  No multi-complaint incident clusters currently active on this road segment.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                  {mlSignals.incident_clusters.map((cl: any) => (
+                    <div key={cl.cluster_id} className="p-4 bg-rt-canvas border-2 border-rt-ink rounded-[4px] shadow-brutal-sm space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-mono font-bold bg-white px-2 py-0.5 rounded border border-rt-ink text-rt-ink">
+                          {cl.cluster_id}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          {cl.languages_present.map((lang: string) => (
+                            <span key={lang} className="text-[9px] font-mono font-bold uppercase bg-rt-primary px-1.5 py-0.5 rounded border border-rt-ink text-rt-ink">
+                              {lang}
+                            </span>
+                          ))}
+                          <span className="text-[10px] font-mono font-bold bg-rt-mint px-2 py-0.5 rounded border border-rt-ink text-rt-ink">
+                            {Math.round(cl.confidence_score * 100)}% Match
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-xs font-headline font-bold text-rt-ink">
+                        Canonical: {cl.canonical_category} &bull; {cl.total_complaints} Citizen Reports
+                      </div>
+                      <p className="text-xs font-body text-rt-secondary-text italic bg-white p-2 rounded border border-rt-ink">
+                        "{cl.representative_description}"
+                      </p>
+                      <div className="flex items-center justify-between text-[11px] font-mono text-rt-secondary-text pt-1">
+                        <span>Report IDs: {cl.complaint_ids.slice(0, 3).join(', ')}{cl.complaint_ids.length > 3 ? '...' : ''}</span>
+                        <span>{cl.locality}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Section 2: Model B Isolation Forest Anomaly Analysis */}
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-headline font-black uppercase text-rt-ink flex items-center gap-1.5">
+                  <Cpu className="w-4 h-4 text-rt-ink" />
+                  Model B &bull; Repair Anomaly Screening (Isolation Forest)
+                </h3>
+                <span className="text-[10px] font-mono text-rt-secondary-text">Peer-Group Partitioned &bull; Contamination 0.06</span>
+              </div>
+
+              {!mlSignals?.repair_anomaly_summary?.anomalies || mlSignals.repair_anomaly_summary.anomalies.length === 0 ? (
+                <div className="p-4 bg-rt-canvas border border-rt-ink rounded text-xs font-mono text-rt-secondary-text">
+                  All work orders on this road align with statistical peer baselines.
+                </div>
+              ) : (
+                <div className="space-y-3.5">
+                  {mlSignals.repair_anomaly_summary.anomalies.map((an: any) => {
+                    const isHigh = an.classification === 'High-priority investigation candidate';
+                    const isUnusual = an.classification === 'Unusual pattern';
+                    return (
+                      <div key={an.work_order_id} className="p-4 bg-white border-2 border-rt-ink rounded-[4px] shadow-brutal-sm space-y-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-rt-ink pb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-mono font-bold bg-rt-canvas px-2 py-0.5 rounded border border-rt-ink text-rt-ink">
+                              {an.work_order_id}
+                            </span>
+                            <span className="text-xs font-headline font-bold text-rt-ink">
+                              {an.repair_method} &bull; ₹{an.cost_inr.toLocaleString('en-IN')}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded border border-rt-ink ${
+                              isHigh ? 'bg-rt-coral text-white' : isUnusual ? 'bg-rt-primary text-rt-ink' : 'bg-rt-mint text-rt-ink'
+                            }`}>
+                              {an.classification}
+                            </span>
+                            <span className="text-[10px] font-mono font-bold bg-white px-2 py-0.5 rounded border border-rt-ink text-rt-ink">
+                              Score: {an.anomaly_score}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Feature Deviations */}
+                        {an.differentiating_features && an.differentiating_features.length > 0 && (
+                          <div className="space-y-1.5">
+                            <span className="text-[10px] font-mono uppercase font-bold text-rt-secondary-text block">
+                              Statistical Deviations vs Peer Group (N={an.peer_group_size}):
+                            </span>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono">
+                              {an.differentiating_features.map((dev: any, i: number) => (
+                                <div key={i} className="p-2 bg-rt-canvas rounded border border-rt-ink flex justify-between items-center">
+                                  <span className="font-bold text-rt-ink capitalize">{dev.feature.replace('_', ' ')}</span>
+                                  <span className={`font-bold ${dev.deviation_pct > 0 ? 'text-rt-coral' : 'text-blue-700'}`}>
+                                    {dev.observed_value} vs median {dev.peer_median} ({dev.deviation_pct > 0 ? '+' : ''}{dev.deviation_pct}%)
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Missing Evidence Checklist & Action */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono pt-1">
+                          <div className="p-2.5 bg-rt-muted rounded border border-rt-ink">
+                            <strong className="block text-rt-ink mb-1 font-headline">Missing Verification Checklist:</strong>
+                            <ul className="list-disc pl-4 space-y-0.5 text-rt-secondary-text text-[11px]">
+                              {an.missing_evidence.map((item: string, i: number) => (
+                                <li key={i}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div className="p-2.5 bg-rt-primary/20 rounded border border-rt-ink">
+                            <strong className="block text-rt-ink mb-1 font-headline">Recommended Procedural Action:</strong>
+                            <p className="text-[11px] text-rt-ink font-body leading-relaxed">
+                              {an.recommended_action}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Button to inspect work order modal */}
+                        <div className="pt-1 flex justify-end">
+                          <button
+                            onClick={() => onSelectWorkOrder(an.work_order_id)}
+                            className="text-xs font-headline font-bold text-rt-ink hover:underline flex items-center gap-1"
+                          >
+                            <span>Inspect Full Evidence Dossier</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Section 3: Actionable Social Signals */}
+            {mlSignals?.actionable_social_signals && mlSignals.actionable_social_signals.length > 0 && (
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-headline font-black uppercase text-rt-ink flex items-center gap-1.5">
+                    <MessageSquare className="w-4 h-4 text-rt-ink" />
+                    Actionable Social Media Signals
+                  </h3>
+                  <span className="text-[10px] font-mono text-rt-secondary-text">Civic Noise Filter Active</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
+                  {mlSignals.actionable_social_signals.map((sig: any) => (
+                    <div key={sig.post_id} className="p-3 bg-rt-canvas border-2 border-rt-ink rounded-[4px] shadow-brutal-sm space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-rt-secondary-text">{sig.source} &bull; {sig.author_handle}</span>
+                        <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded border border-rt-ink ${
+                          sig.urgency === 'HIGH' ? 'bg-rt-coral text-white' : 'bg-rt-primary text-rt-ink'
+                        }`}>
+                          {sig.urgency} Urgency
+                        </span>
+                      </div>
+                      <p className="font-body text-xs text-rt-ink italic bg-white p-2 rounded border border-rt-ink">
+                        "{sig.text}"
+                      </p>
+                      <div className="flex items-center justify-between text-[10px] text-rt-secondary-text">
+                        <span>Issue: {sig.detected_issue || 'Road Condition'}</span>
+                        <span>{sig.extracted_locality || 'Ward Area'}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>

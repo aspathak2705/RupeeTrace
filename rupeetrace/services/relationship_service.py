@@ -195,6 +195,9 @@ class RelationshipService:
     def get_contractor(self, contractor_id: str) -> Optional[Contractor]:
         return self.contractors_by_id.get(contractor_id.strip())
 
+    def get_complaint(self, complaint_id: str) -> Optional[Complaint]:
+        return self.complaints_by_id.get(complaint_id.strip())
+
     def get_linked_complaints(self, work_order_id: str) -> List[Complaint]:
         cids = self.wo_to_complaints_map.get(work_order_id.strip(), [])
         return [self.complaints_by_id[cid] for cid in cids if cid in self.complaints_by_id]

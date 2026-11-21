@@ -2,15 +2,23 @@ from typing import List, Dict, Any, Optional, Set
 from rupeetrace.services.relationship_service import RelationshipService
 
 class GraphService:
-    def __init__(self, rel_service: RelationshipService):
+    def __init__(
+        self,
+        rel_service: RelationshipService,
+        ml_issue_service = None,
+        ml_anomaly_service = None
+    ):
         self.rel_service = rel_service
+        self.ml_issue_service = ml_issue_service
+        self.ml_anomaly_service = ml_anomaly_service
 
     def get_subgraph(
         self,
         road_id: Optional[str] = None,
         work_order_id: Optional[str] = None,
         ward_code: Optional[str] = None,
-        max_work_orders: int = 10
+        max_work_orders: int = 10,
+        include_ml: bool = False
     ) -> Dict[str, Any]:
         """
         Builds a bounded, evidence-traceable subgraph centered around an asset, work order, or ward.
@@ -318,6 +326,93 @@ class GraphService:
                             "relation_type": "TRIGGERED",
                             "explanation": f"Citizen complaint {c_obj.complaint_id} via {c_obj.channel} triggered repair work order."
                         })
+
+        # 4. Optional ML Intelligence Overlay Edges
+        if include_ml:
+            complaint_ids = [n["id"] for n in nodes.values() if n.get("type") == "Complaint"]
+            wo_ids = [n["id"] for n in nodes.values() if n.get("type") == "WorkOrder"]
+
+            # ML Edge Type 1: Cross-complaint similarity & candidate duplicates
+            if self.ml_issue_service and len(complaint_ids) >= 2:
+                for i in range(len(complaint_ids)):
+                    for j in range(i + 1, len(complaint_ids)):
+                        c1 = complaint_ids[i]
+                        c2 = complaint_ids[j]
+                        sim = self.ml_issue_service.compute_similarity(c1, c2)
+                        if sim >= 0.60:
+                            e_id = f"{c1}->SIMILAR_TO->{c2}"
+                            if e_id not in edge_ids:
+                                edge_ids.add(e_id)
+                                edges.append({
+                                    "id": e_id,
+                                    "source": c1,
+                                    "target": c2,
+                                    "label": f"SIMILAR ({int(sim*100)}%)",
+                                    "relation_type": "SIMILAR_COMPLAINT",
+                                    "explanation": f"Model identified {int(sim*100)}% semantic similarity between citizen reports.",
+                                    "provenance_status": "model-suggested"
+                                })
+
+            # ML Edge Type 2: Isolation Forest Anomaly Peer Benchmarks
+            if self.ml_anomaly_service and wo_ids:
+                for wid in wo_ids:
+                    anomaly = self.ml_anomaly_service.get_anomaly_for_work_order(wid)
+                    if anomaly and anomaly.get("classification") != "Normal pattern":
+                        peers = anomaly.get("comparable_peers", [])
+                        for p in peers[:1]:
+                            p_wid = p["work_order_id"]
+                            # Add peer node if not in nodes
+                            if p_wid not in nodes:
+                                p_wo = self.rel_service.get_work_order(p_wid)
+                                if p_wo:
+                                    nodes[p_wid] = {
+                                        "id": p_wid,
+                                        "label": p_wid,
+                                        "category": "work_order",
+                                        "type": "WorkOrder",
+                                        "title": f"Peer: {p_wo.repair_method}",
+                                        "subtitle": f"Billed: ₹{p_wo.cost_inr:,.0f} • Area: {p_wo.area_sqm:.1f} sqm",
+                                        "data": {
+                                            "work_order_id": p_wid,
+                                            "cost_inr": p_wo.cost_inr,
+                                            "repair_method": p_wo.repair_method,
+                                            "area_sqm": p_wo.area_sqm
+                                        },
+                                        "provenance": p_wo.provenance.dict()
+                                    }
+                            e_id = f"{wid}->PEER_BENCHMARK->{p_wid}"
+                            if e_id not in edge_ids and p_wid in nodes:
+                                edge_ids.add(e_id)
+                                edges.append({
+                                    "id": e_id,
+                                    "source": wid,
+                                    "target": p_wid,
+                                    "label": "PEER BENCHMARK",
+                                    "relation_type": "PEER_BENCHMARK",
+                                    "explanation": f"Statistical peer work order in same repair group used for Isolation Forest baseline comparison.",
+                                    "provenance_status": "model-suggested"
+                                })
+
+            # ML Edge Type 3: Candidate Complaint-to-Work-Order Match
+            if self.ml_issue_service and target_roads:
+                for road in target_roads:
+                    suggested_links = self.ml_issue_service.suggest_work_order_links(road.road_id)
+                    for sl in suggested_links[:3]:
+                        cid = sl["complaint_id"]
+                        wid = sl["work_order_id"]
+                        if cid in nodes and wid in nodes:
+                            e_id = f"{cid}->CANDIDATE_REPAIR->{wid}"
+                            if e_id not in edge_ids:
+                                edge_ids.add(e_id)
+                                edges.append({
+                                    "id": e_id,
+                                    "source": cid,
+                                    "target": wid,
+                                    "label": "CANDIDATE MATCH",
+                                    "relation_type": "CANDIDATE_MATCH",
+                                    "explanation": f"Model matched unlinked complaint with repair assigned {sl['delta_days']} days later.",
+                                    "provenance_status": "model-suggested"
+                                })
 
         return {
             "root": {

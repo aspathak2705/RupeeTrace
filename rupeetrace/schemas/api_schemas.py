@@ -146,6 +146,7 @@ class AuditFindingResponse(BaseModel):
     reason: str
     limitations: str
     recommended_action: str
+    provenance_type: Optional[str] = "[Deterministic]"
 
 # --- Contractor Scorecard Schema ---
 class ContractorScorecardResponse(BaseModel):
