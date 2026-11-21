@@ -1,6 +1,8 @@
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field
-from fastapi import APIRouter, Request, HTTPException, Path
+from fastapi import APIRouter, Request, HTTPException, Path, Depends
+
+from rupeetrace.core.auth import require_role
 
 router = APIRouter(prefix="/cases", tags=["Shared Cases"])
 
@@ -43,11 +45,18 @@ def create_case(request: Request, body: CreateCaseRequest):
     )
 
 @router.post("/{case_id}/respond", response_model=Dict[str, Any])
-def respond_case(request: Request, case_id: str, body: RespondCaseRequest):
+def respond_case(
+    request: Request,
+    case_id: str,
+    body: RespondCaseRequest,
+    current_user: Dict[str, Any] = Depends(require_role("officer"))
+):
     case_service = request.app.state.case_service
+    # Use authenticated officer's verified identity
+    officer_name = f"{current_user.get('name', body.officer_name)} ({current_user.get('designation', 'Ward Officer')})"
     updated = case_service.respond_case(
         case_id=case_id,
-        officer_name=body.officer_name,
+        officer_name=officer_name,
         officer_response=body.officer_response,
         new_status=body.new_status
     )

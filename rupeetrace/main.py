@@ -28,7 +28,7 @@ from rupeetrace.services.material_intelligence_service import MaterialIntelligen
 from rupeetrace.services.citizen_verification_service import CitizenVerificationService
 from rupeetrace.services.civic_value_optimizer_service import CivicValueOptimizerService
 
-from rupeetrace.api.routes import health, wards, roads, work_orders, audits, contractors, graph, cases, assistant, intelligence, civic
+from rupeetrace.api.routes import health, wards, roads, work_orders, audits, contractors, graph, cases, assistant, intelligence, civic, auth
 
 def init_app_state(app: FastAPI):
     """Synchronously populates app.state so all routers and tests are immediately operational."""
@@ -107,6 +107,7 @@ app.add_middleware(
 )
 
 # Mount API routers
+app.include_router(auth.router, prefix=settings.API_PREFIX)
 app.include_router(health.router, prefix=settings.API_PREFIX)
 app.include_router(wards.router, prefix=settings.API_PREFIX)
 app.include_router(roads.router, prefix=settings.API_PREFIX)

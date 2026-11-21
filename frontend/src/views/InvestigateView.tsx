@@ -249,8 +249,8 @@ export const InvestigateView: React.FC<Props> = ({
           </div>
 
           <VisualMoneyTraceGraphView
-            initialFocusType="road"
-            initialFocusId={currentRoadId}
+            initialMode="road"
+            initialEntityId={currentRoadId}
             onOpenPassport={(id) => {
               onSelectRoad(id);
               setMode('passport');

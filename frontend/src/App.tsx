@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { Navbar } from './components/Navbar';
 import { DemoTourBar } from './components/DemoTourBar';
 import { AIAssistantDrawer } from './components/AIAssistantDrawer';
 import { WorkOrderEvidenceModal } from './components/WorkOrderEvidenceModal';
+import { LoginModal } from './components/LoginModal';
+import { AccessRestrictedGate } from './components/AccessRestrictedGate';
+import { CitizenLandingView } from './views/CitizenLandingView';
 import { OverviewView } from './views/OverviewView';
 import { InvestigateView } from './views/InvestigateView';
 import { AccountabilityView } from './views/AccountabilityView';
@@ -10,17 +14,22 @@ import { NextRupeePlannerView } from './views/NextRupeePlannerView';
 import { PublicPortalView } from './views/PublicPortalView';
 import { api } from './api/client';
 
-export const App: React.FC = () => {
-  // 5 Primary Destinations: 'overview' | 'investigate' | 'accountability' | 'next-rupee' | 'portal'
-  const [activeView, setActiveView] = useState<string>('overview');
+const AppContent: React.FC = () => {
+  const { user, isOfficer, isCitizen, loginDemo } = useAuth();
+
+  // Active view destination:
+  // Citizen: 'citizen-home' | 'overview' | 'investigate' | 'portal' | 'janmat'
+  // Officer: 'overview' | 'investigate' | 'accountability' | 'next-rupee' | 'portal'
+  const [activeView, setActiveView] = useState<string>('citizen-home');
   const [selectedWard, setSelectedWard] = useState<string>('K/E');
   const [selectedRoadId, setSelectedRoadId] = useState<string>('RD0140');
   const [investigateMode, setInvestigateMode] = useState<'passport' | 'graph' | 'ledger'>('passport');
   const [accountabilityTab, setAccountabilityTab] = useState<'sentinel' | 'scorecards'>('sentinel');
-  const [role, setRole] = useState<'citizen' | 'officer'>('citizen');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeWorkOrderId, setActiveWorkOrderId] = useState<string | null>(null);
   const [showAssistant, setShowAssistant] = useState<boolean>(false);
+  const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
+  const [restrictedTarget, setRestrictedTarget] = useState<string>('');
   const [wardsList, setWardsList] = useState<string[]>([
     'A', 'B', 'C', 'D', 'E', 'F/N', 'F/S', 'G/N', 'G/S',
     'H/E', 'H/W', 'K/E', 'K/W', 'L', 'M/E', 'M/W', 'N',
@@ -38,6 +47,13 @@ export const App: React.FC = () => {
       .catch(err => console.error('Error fetching wards:', err));
   }, []);
 
+  // Update default view when role changes
+  useEffect(() => {
+    if (isOfficer && activeView === 'citizen-home') {
+      setActiveView('overview');
+    }
+  }, [isOfficer]);
+
   // Global Keyboard shortcut (Cmd+K / Ctrl+K) for AI Assistant
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -50,12 +66,12 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Hash-based routing synchronization (with backward compatibility)
+  // Hash-based routing synchronization
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace(/^#\/?/, '');
-      if (!hash || hash === 'overview' || hash === 'money-trail') {
-        setActiveView('overview');
+      if (!hash) {
+        setActiveView(isOfficer ? 'overview' : 'citizen-home');
         return;
       }
 
@@ -83,15 +99,29 @@ export const App: React.FC = () => {
         setActiveView('next-rupee');
       } else if (hash.startsWith('cases') || hash.startsWith('portal')) {
         setActiveView('portal');
+      } else if (hash.startsWith('janmat')) {
+        setActiveView('janmat');
+      } else if (hash.startsWith('overview') || hash.startsWith('money-trail')) {
+        setActiveView('overview');
+      } else if (hash.startsWith('citizen-home')) {
+        setActiveView('citizen-home');
       }
     };
 
     handleHashChange();
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
+  }, [isOfficer]);
 
   const navigateToView = (view: string) => {
+    // If citizen tries to navigate to officer-only views, display access gate
+    if (isCitizen && (view === 'accountability' || view === 'next-rupee')) {
+      setRestrictedTarget(view === 'accountability' ? 'DLP Sentinel & Forensic Audits' : 'Next Rupee Planner & Budget Simulator');
+      setActiveView(view);
+      window.location.hash = `#/${view}`;
+      return;
+    }
+
     setActiveView(view);
     window.location.hash = `#/${view}`;
   };
@@ -120,35 +150,45 @@ export const App: React.FC = () => {
   };
 
   // Demo Tour Handler for 4-minute evaluation
-  const handleDemoStep = (step: number) => {
+  const handleDemoStep = async (step: number) => {
     switch (step) {
-      case 1: // Destination 1: Ward Overview & Money Trail
+      case 1: // Step 1: Citizen Landing & Ward Overview
         setSelectedWard('K/E');
-        navigateToView('overview');
+        navigateToView(isOfficer ? 'overview' : 'citizen-home');
         break;
-      case 2: // Destination 2: Road Passport RD0140
+      case 2: // Step 2: Road Passport RD0140
         setSelectedRoadId('RD0140');
         setInvestigateMode('passport');
         setActiveView('investigate');
         window.location.hash = `#/passport/RD0140`;
         break;
-      case 3: // Destination 2: Money Trace Graph
+      case 3: // Step 3: Entity-Specific Money Trace Graph
+        // Automatically ensure officer role for full investigation board
+        if (!isOfficer) {
+          await loginDemo('officer');
+        }
         setSelectedRoadId('RD0140');
         setInvestigateMode('graph');
         setActiveView('investigate');
         window.location.hash = `#/graph`;
         break;
-      case 4: // Destination 3: Audit Evidence Modal (WO25-00600)
+      case 4: // Step 4: Audit Evidence Modal (WO25-00600)
         setActiveWorkOrderId('WO25-00600');
         break;
-      case 5: // Destination 3: Accountability & Contractor Scorecards
+      case 5: // Step 5: Officer DLP Sentinel & Contractor Scorecards
+        if (!isOfficer) {
+          await loginDemo('officer');
+        }
         setAccountabilityTab('scorecards');
         navigateToView('accountability');
         break;
-      case 6: // Destination 5: Public Portal & Citizen Verification
+      case 6: // Step 6: 7-Stage Citizen Verification & Cases
         navigateToView('portal');
         break;
-      case 7: // Destination 4: Next Rupee Planner 2.0
+      case 7: // Step 7: Next Rupee Planner 2.0 (Budget Simulator & IRC Materials)
+        if (!isOfficer) {
+          await loginDemo('officer');
+        }
         setSelectedWard('K/E');
         navigateToView('next-rupee');
         break;
@@ -159,11 +199,12 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-rt-canvas text-rt-ink flex flex-col font-body selection:bg-rt-primary selection:text-rt-ink">
+      
       {/* Top Banner: Synthetic Civic Research Data Notice */}
       <div className="bg-rt-ink text-white border-b-2 border-rt-ink text-[11px] font-mono py-1 px-4 text-center flex items-center justify-center space-x-2">
         <span className="w-2 h-2 rounded-full bg-rt-primary animate-pulse" />
         <span>
-          <strong>RUPEETRACE PROTOTYPE:</strong> Synthetic civic research records. Billed expenditures represent recorded work-order figures, not verified treasury disbursements.
+          <strong>RUPEETRACE DEMO:</strong> Authenticated as <strong>{user?.name}</strong> ({user?.role?.toUpperCase()}). Role-based permissions actively enforced by backend.
         </span>
       </div>
 
@@ -173,40 +214,63 @@ export const App: React.FC = () => {
         onOpenAssistant={() => setShowAssistant(true)}
       />
 
-      {/* Main Global Navigation (5 Primary Destinations) */}
+      {/* Main Global Navigation */}
       <Navbar
         activeView={activeView}
         setActiveView={navigateToView}
         selectedWard={selectedWard}
         setSelectedWard={setSelectedWard}
-        role={role}
-        setRole={setRole}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         onSearchSubmit={handleSearchSubmit}
         wardsList={wardsList}
         onOpenAssistant={() => setShowAssistant(true)}
+        onOpenLogin={() => setShowLoginModal(true)}
       />
 
       {/* Active Page View */}
       <main className="flex-1">
-        {/* DESTINATION 1: OVERVIEW */}
+        
+        {/* VIEW 0: CITIZEN HOME (Citizen Workspace Landing) */}
+        {activeView === 'citizen-home' && (
+          <CitizenLandingView
+            currentWard={selectedWard}
+            onNavigatePassport={handleOpenPassport}
+            onNavigateVerification={() => navigateToView('portal')}
+            onNavigateJanmat={() => navigateToView('janmat')}
+            onNavigateWardOverview={() => navigateToView('overview')}
+          />
+        )}
+
+        {/* VIEW 1: WARD OVERVIEW / MONEY TRAIL */}
         {activeView === 'overview' && (
           <OverviewView
             wardCode={selectedWard}
             onInvestigateRoad={handleOpenPassport}
             onOpenWorkOrder={(woId) => setActiveWorkOrderId(woId)}
             onNavigateAccountability={(tab) => {
-              if (tab === 'scorecards') setAccountabilityTab('scorecards');
-              else setAccountabilityTab('sentinel');
-              navigateToView('accountability');
+              if (isCitizen) {
+                setRestrictedTarget('DLP Sentinel & Forensic Audits');
+                setShowLoginModal(true);
+              } else {
+                if (tab === 'scorecards') setAccountabilityTab('scorecards');
+                else setAccountabilityTab('sentinel');
+                navigateToView('accountability');
+              }
             }}
-            onNavigateNextRupee={() => navigateToView('next-rupee')}
+            onNavigateNextRupee={() => {
+              if (isCitizen) {
+                setRestrictedTarget('Next Rupee Planner & Budget Simulator');
+                setShowLoginModal(true);
+              } else {
+                navigateToView('next-rupee');
+              }
+            }}
             onNavigatePortal={() => navigateToView('portal')}
           />
         )}
 
-        {/* DESTINATION 2: INVESTIGATE */}
+        {/* VIEW 2: INVESTIGATE (Road Passport / Visual Money Trace Board) */}
         {activeView === 'investigate' && (
           <InvestigateView
             currentRoadId={selectedRoadId}
@@ -224,46 +288,61 @@ export const App: React.FC = () => {
           />
         )}
 
-        {/* DESTINATION 3: ACCOUNTABILITY */}
+        {/* VIEW 3: ACCOUNTABILITY (DLP Sentinel, Scorecards, Tenders) */}
         {activeView === 'accountability' && (
-          <AccountabilityView
-            currentWard={selectedWard}
-            role={role}
-            onOpenPassport={handleOpenPassport}
-            onOpenWorkOrder={(woId) => setActiveWorkOrderId(woId)}
-            onNavigateToGraph={(type, id) => {
-              if (type === 'road') setSelectedRoadId(id);
-              setInvestigateMode('graph');
-              setActiveView('investigate');
-            }}
-            initialSubTab={accountabilityTab}
-          />
+          isCitizen ? (
+            <AccessRestrictedGate
+              workspaceName="DLP Sentinel &amp; Repair Auditor"
+              onOpenLogin={() => setShowLoginModal(true)}
+            />
+          ) : (
+            <AccountabilityView
+              currentWard={selectedWard}
+              role="officer"
+              onOpenPassport={handleOpenPassport}
+              onOpenWorkOrder={(woId) => setActiveWorkOrderId(woId)}
+              onNavigateToGraph={(type, id) => {
+                if (type === 'road') setSelectedRoadId(id);
+                setInvestigateMode('graph');
+                setActiveView('investigate');
+              }}
+              initialSubTab={accountabilityTab}
+            />
+          )
         )}
 
-        {/* DESTINATION 4: NEXT RUPEE */}
+        {/* VIEW 4: NEXT RUPEE (Budget Simulator, Knapsack, IRC Materials) */}
         {activeView === 'next-rupee' && (
-          <NextRupeePlannerView
-            initialWard={selectedWard}
-            initialRoadId={selectedRoadId}
-            role={role}
-            onOpenPassport={handleOpenPassport}
-            onNavigateToMoneyTrail={(code) => {
-              setSelectedWard(code);
-              navigateToView('overview');
-            }}
-          />
+          isCitizen ? (
+            <AccessRestrictedGate
+              workspaceName="Next Rupee Planner &amp; Budget Simulator"
+              onOpenLogin={() => setShowLoginModal(true)}
+            />
+          ) : (
+            <NextRupeePlannerView
+              initialWard={selectedWard}
+              initialRoadId={selectedRoadId}
+              role="officer"
+              onOpenPassport={handleOpenPassport}
+              onNavigateToMoneyTrail={(code) => {
+                setSelectedWard(code);
+                navigateToView('overview');
+              }}
+            />
+          )
         )}
 
-        {/* DESTINATION 5: PUBLIC PORTAL */}
-        {activeView === 'portal' && (
+        {/* VIEW 5: PUBLIC PORTAL & CASES / JANMAT */}
+        {(activeView === 'portal' || activeView === 'janmat') && (
           <PublicPortalView
             initialRoadId={selectedRoadId}
             currentWard={selectedWard}
-            role={role}
+            role={user?.role || 'citizen'}
             onOpenPassport={handleOpenPassport}
             onOpenWorkOrder={(woId) => setActiveWorkOrderId(woId)}
           />
         )}
+
       </main>
 
       {/* Floating AI Assistant Trigger (Bottom-Right) */}
@@ -291,6 +370,13 @@ export const App: React.FC = () => {
         />
       )}
 
+      {/* Global Role-Based Login Modal */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        requiredRole={restrictedTarget ? 'officer' : undefined}
+      />
+
       {/* Global AI Assistant Drawer */}
       <AIAssistantDrawer
         isOpen={showAssistant}
@@ -300,6 +386,15 @@ export const App: React.FC = () => {
         onNavigateRoad={handleOpenPassport}
         onNavigateWorkOrder={(woId) => setActiveWorkOrderId(woId)}
       />
+
     </div>
+  );
+};
+
+export const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 };

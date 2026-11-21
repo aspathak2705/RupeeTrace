@@ -400,6 +400,16 @@ export interface GraphNode {
   y?: number;
 }
 
+export interface UserSession {
+  username: string;
+  name: string;
+  role: 'citizen' | 'officer';
+  designation: string;
+  ward_code: string;
+  locality?: string;
+  office?: string;
+}
+
 export interface GraphEdge {
   id: string;
   source: string;
@@ -407,6 +417,25 @@ export interface GraphEdge {
   label: string;
   relation_type: string;
   explanation: string;
+  is_ml?: boolean;
+  confidence_score?: number;
+  provenance_status?: string;
+}
+
+export interface EntityInvestigationResponse {
+  investigation_mode: string;
+  root_id: string;
+  root_node: GraphNode;
+  nodes_count: number;
+  edges_count: number;
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+  expanded_nodes: string[];
+  available_relationship_types: Array<{
+    type: string;
+    label: string;
+    description: string;
+  }>;
 }
 
 export interface GraphData {

@@ -1,7 +1,8 @@
 import urllib.parse
 from typing import List, Dict, Any, Optional
-from fastapi import APIRouter, Request, HTTPException, Path, Query, Body, UploadFile, File, Form
+from fastapi import APIRouter, Request, HTTPException, Path, Query, Body, UploadFile, File, Form, Depends
 from pydantic import BaseModel, Field
+from rupeetrace.core.auth import require_role
 
 router = APIRouter(prefix="/civic", tags=["Civic Intelligence"])
 
@@ -157,14 +158,16 @@ def add_proposal_comment(
 def update_proposal_lifecycle(
     request: Request,
     proposal_id: str = Path(...),
-    body: LifecycleUpdateRequest = Body(...)
+    body: LifecycleUpdateRequest = Body(...),
+    current_user: Dict[str, Any] = Depends(require_role("officer"))
 ):
     janmat_svc = request.app.state.janmat_service
+    actor_name = f"{current_user.get('name', body.actor)} ({current_user.get('designation', 'Ward Officer')})"
     try:
         return janmat_svc.update_lifecycle_status(
             proposal_id=proposal_id,
             new_status=body.new_status,
-            actor=body.actor,
+            actor=actor_name,
             reason=body.reason,
             supporting_evidence=body.supporting_evidence
         )
@@ -233,16 +236,18 @@ def optimize_budget(
 def save_custom_scenario(
     request: Request,
     ward_code: str = Path(...),
-    body: SaveScenarioRequest = Body(...)
+    body: SaveScenarioRequest = Body(...),
+    current_user: Dict[str, Any] = Depends(require_role("officer"))
 ):
     sim_svc = request.app.state.budget_simulator_service
+    created_by = f"{current_user.get('name', body.created_by)} ({current_user.get('designation', 'Ward Officer')})"
     return sim_svc.save_custom_scenario(
         ward_code=ward_code,
         name=body.scenario_name,
         description=body.description,
         total_budget=body.total_budget,
         selected_ids=body.selected_proposal_ids,
-        created_by=body.created_by
+        created_by=created_by
     )
 
 @router.get("/simulator/{ward_code}/scenarios")
@@ -282,7 +287,8 @@ def compare_contractors_for_proposal(
 def evaluate_tender_bids(
     request: Request,
     proposal_id: str = Path(...),
-    body: TenderEvaluateRequest = Body(...)
+    body: TenderEvaluateRequest = Body(...),
+    current_user: Dict[str, Any] = Depends(require_role("officer"))
 ):
     ci_svc = request.app.state.contractor_intelligence_service
     try:
@@ -303,7 +309,8 @@ def get_material_alternatives(
 @router.post("/materials/optimization-report")
 def generate_cost_optimization_report(
     request: Request,
-    body: CostOptimizationRequest = Body(...)
+    body: CostOptimizationRequest = Body(...),
+    current_user: Dict[str, Any] = Depends(require_role("officer"))
 ):
     mat_svc = request.app.state.material_intelligence_service
     return mat_svc.generate_cost_optimization_report(
@@ -377,7 +384,8 @@ async def upload_verification_evidence(
 @router.get("/optimizer/{proposal_id}/report")
 def get_unified_decision_brief(
     request: Request,
-    proposal_id: str = Path(...)
+    proposal_id: str = Path(...),
+    current_user: Dict[str, Any] = Depends(require_role("officer"))
 ):
     opt_svc = request.app.state.civic_value_optimizer_service
     try:

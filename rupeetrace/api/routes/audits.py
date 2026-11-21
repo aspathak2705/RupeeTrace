@@ -1,8 +1,15 @@
-from typing import List, Optional
-from fastapi import APIRouter, Request, HTTPException, Path
+from typing import List, Optional, Dict, Any
+from fastapi import APIRouter, Request, HTTPException, Path, Depends, Body
+from pydantic import BaseModel
 from rupeetrace.schemas.api_schemas import AuditFindingResponse
+from rupeetrace.core.auth import require_role
 
 router = APIRouter(prefix="/audits", tags=["Repair Auditor"])
+
+class ReviewAuditRequest(BaseModel):
+    action: str = "ACKNOWLEDGE" # "ACKNOWLEDGE", "DISPATCH_RECOVERY_NOTICE", "DISMISS_DISPUTE"
+    remedial_notes: str
+    recovery_amount_inr: Optional[float] = None
 
 @router.get("", response_model=List[AuditFindingResponse])
 def get_audit_findings(
@@ -33,3 +40,24 @@ def get_finding_by_id(request: Request, finding_id: str = Path(...)):
     if not finding:
         raise HTTPException(status_code=404, detail=f"Audit finding '{finding_id}' not found.")
     return finding
+
+@router.post("/{finding_id}/review")
+def review_audit_finding(
+    request: Request,
+    finding_id: str = Path(...),
+    body: ReviewAuditRequest = Body(...),
+    current_user: Dict[str, Any] = Depends(require_role("officer"))
+):
+    audit_service = request.app.state.audit_service
+    finding = audit_service.get_finding_by_id(finding_id)
+    if not finding:
+        raise HTTPException(status_code=404, detail=f"Audit finding '{finding_id}' not found.")
+
+    return {
+        "finding_id": finding_id,
+        "action_taken": body.action,
+        "reviewed_by": f"{current_user.get('name')} ({current_user.get('designation')})",
+        "officer_notes": body.remedial_notes,
+        "recovery_amount_inr": body.recovery_amount_inr or finding.recovery_opportunity_inr,
+        "status": "RECOVERY_DISPATCHED" if body.action == "DISPATCH_RECOVERY_NOTICE" else "OFFICER_ACKNOWLEDGED"
+    }
