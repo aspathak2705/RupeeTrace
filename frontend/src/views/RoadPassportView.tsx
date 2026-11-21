@@ -3,8 +3,9 @@ import {
   Compass, QrCode, GitBranch, ShieldAlert, CheckCircle2, Clock,
   AlertTriangle, FileText, ArrowRight, Activity, Building, MapPin,
   ExternalLink, Calendar, Car, AlertOctagon, HeartHandshake, Eye, Printer,
-  Sparkles, MessageSquare, Layers, Cpu, Vote
+  Sparkles, MessageSquare, Layers, Cpu, Vote, ShieldCheck, Lock
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import { RoadDetail, Complaint, WorkOrder, RoadFinancialHistory, AuditFinding, CaseRecord } from '../types';
 import { api } from '../api/client';
 import { EvidenceBadge } from '../components/EvidenceBadge';
@@ -23,6 +24,7 @@ export const RoadPassportView: React.FC<Props> = ({
   onNavigateGraph,
   onNavigateCreateCase
 }) => {
+  const { isOfficer } = useAuth();
   const [road, setRoad] = useState<RoadDetail | null>(null);
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [history, setHistory] = useState<RoadFinancialHistory | null>(null);
@@ -229,15 +231,25 @@ export const RoadPassportView: React.FC<Props> = ({
 
       {/* Chapter Tabs Navigation Bar */}
       <div className="flex items-center space-x-2 border-b-2 border-rt-ink pb-3 overflow-x-auto no-scrollbar text-xs font-headline">
-        {[
-          { num: 1, name: '01 ROAD IDENTITY' },
-          { num: 2, name: '02 CITIZEN HISTORY' },
-          { num: 3, name: '03 REPAIRS & SCOPE' },
-          { num: 4, name: '04 MONEY HISTORY' },
-          { num: 5, name: '05 DURABILITY' },
-          { num: 6, name: '06 CASES & ACTIONS' },
-          { num: 7, name: '07 ML INTELLIGENCE' }
-        ].map(ch => (
+        {(isOfficer
+          ? [
+              { num: 1, name: '01 ROAD IDENTITY' },
+              { num: 2, name: '02 CITIZEN HISTORY' },
+              { num: 3, name: '03 REPAIRS & SCOPE' },
+              { num: 4, name: '04 MONEY HISTORY' },
+              { num: 5, name: '05 AUDIT FINDINGS' },
+              { num: 6, name: '06 CASES & ACTIONS' },
+              { num: 7, name: '07 ML INTELLIGENCE' }
+            ]
+          : [
+              { num: 1, name: '01 ROAD IDENTITY' },
+              { num: 2, name: '02 CITIZEN HISTORY' },
+              { num: 3, name: '03 REPAIRS & SCOPE' },
+              { num: 4, name: '04 MONEY HISTORY' },
+              { num: 5, name: '05 WARRANTY & DURABILITY' },
+              { num: 6, name: '06 CITIZEN DIALOGUE' }
+            ]
+        ).map(ch => (
           <button
             key={ch.num}
             onClick={() => setActiveChapter(ch.num)}
@@ -467,43 +479,91 @@ export const RoadPassportView: React.FC<Props> = ({
           </div>
         )}
 
-        {/* CHAPTER 5 — Repair Performance & Audit Findings */}
+        {/* CHAPTER 5 — Repair Performance & Audit Findings / Warranty */}
         {activeChapter === 5 && (
-          <div className="p-6 bg-white border-3 border-rt-ink rounded-[6px] shadow-brutal space-y-4">
-            <h2 className="text-lg font-headline font-black text-rt-ink uppercase tracking-wider flex items-center gap-2 border-b-2 border-rt-ink pb-3">
-              <ShieldAlert className="w-5 h-5 text-rt-coral" />
-              Chapter 05 — Audit Findings & Repair Durability
-            </h2>
-            <p className="text-xs font-mono text-rt-secondary-text">
-              Algorithmic screening findings: rate-card deviations, duplicate work orders, and DLP warranty expenditures.
-            </p>
+          isOfficer ? (
+            <div className="p-6 bg-white border-3 border-rt-ink rounded-[6px] shadow-brutal space-y-4">
+              <h2 className="text-lg font-headline font-black text-rt-ink uppercase tracking-wider flex items-center gap-2 border-b-2 border-rt-ink pb-3">
+                <ShieldAlert className="w-5 h-5 text-rt-coral" />
+                Chapter 05 — Audit Findings &amp; Repair Durability (Officer Forensic Mode)
+              </h2>
+              <p className="text-xs font-mono text-rt-secondary-text">
+                Algorithmic screening findings: rate-card deviations, duplicate work orders, and DLP warranty expenditures.
+              </p>
 
-            {auditFindings.length === 0 ? (
-              <div className="p-6 bg-rt-canvas border-2 border-rt-ink rounded-[4px] text-xs font-mono text-rt-secondary-text">
-                No active audit flags triggered for this road asset. Standard variance parameters met.
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {auditFindings.map(af => (
-                  <div key={af.finding_id} className="p-4 bg-white border-2 border-rt-ink rounded-[4px] shadow-brutal-sm text-xs space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <span className="font-mono font-bold bg-rt-coral text-white px-2 py-0.5 rounded border border-rt-ink">
-                          {af.finding_id}
-                        </span>
-                        <span className="font-headline font-bold text-rt-ink">{af.finding_type}</span>
+              {auditFindings.length === 0 ? (
+                <div className="p-6 bg-rt-canvas border-2 border-rt-ink rounded-[4px] text-xs font-mono text-rt-secondary-text">
+                  No active audit flags triggered for this road asset. Standard variance parameters met.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {auditFindings.map(af => (
+                    <div key={af.finding_id} className="p-4 bg-white border-2 border-rt-ink rounded-[4px] shadow-brutal-sm text-xs space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-mono font-bold bg-rt-coral text-white px-2 py-0.5 rounded border border-rt-ink">
+                            {af.finding_id}
+                          </span>
+                          <span className="font-headline font-bold text-rt-ink">{af.finding_type}</span>
+                        </div>
+                        <span className="font-mono font-bold text-rt-coral uppercase text-[10px]">{af.status}</span>
                       </div>
-                      <span className="font-mono font-bold text-rt-coral uppercase text-[10px]">{af.status}</span>
+                      <p className="text-rt-ink font-body font-medium">{af.reason}</p>
+                      <div className="p-2 bg-rt-canvas rounded border border-rt-ink font-mono text-[11px] text-rt-secondary-text">
+                        Recommended Action: <strong className="text-rt-ink">{af.recommended_action}</strong>
+                      </div>
                     </div>
-                    <p className="text-rt-ink font-body font-medium">{af.reason}</p>
-                    <div className="p-2 bg-rt-canvas rounded border border-rt-ink font-mono text-[11px] text-rt-secondary-text">
-                      Recommended Action: <strong className="text-rt-ink">{af.recommended_action}</strong>
-                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="p-6 bg-white border-3 border-rt-ink rounded-[6px] shadow-brutal space-y-4">
+              <h2 className="text-lg font-headline font-black text-rt-ink uppercase tracking-wider flex items-center gap-2 border-b-2 border-rt-ink pb-3">
+                <ShieldCheck className="w-5 h-5 text-rt-mint" />
+                Chapter 05 — Public Warranty &amp; Durability Status
+              </h2>
+              <p className="text-xs font-mono text-rt-secondary-text">
+                Official contractor guarantee terms and defect liability protections for residents of Ward {road.ward_code}.
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-xs">
+                <div className="p-4 bg-rt-canvas border-2 border-rt-ink rounded-[4px] space-y-2.5 shadow-brutal-sm">
+                  <h4 className="font-headline font-bold text-rt-ink uppercase text-sm border-b border-rt-ink/20 pb-1.5">Warranty Protection</h4>
+                  <div className="flex justify-between py-1 border-b border-rt-ink/10">
+                    <span className="text-rt-secondary-text font-bold">Defect Liability:</span>
+                    <span className={`font-bold px-2 py-0.5 rounded border border-rt-ink ${road.under_dlp ? 'bg-rt-coral text-white' : 'bg-white text-rt-ink'}`}>
+                      {road.under_dlp ? 'Active 2-Year Warranty' : 'Expired'}
+                    </span>
                   </div>
-                ))}
+                  <div className="flex justify-between py-1 border-b border-rt-ink/10">
+                    <span className="text-rt-secondary-text font-bold">Citizen Recourse:</span>
+                    <span className="text-rt-ink font-bold">{road.under_dlp ? 'Contractor Rectification Free' : 'Standard Maintenance'}</span>
+                  </div>
+                  <div className="flex justify-between py-1">
+                    <span className="text-rt-secondary-text font-bold">Retainage Escrow:</span>
+                    <span className="text-rt-ink font-bold">Protected by Citizen Verification</span>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-rt-canvas border-2 border-rt-ink rounded-[4px] space-y-2.5 shadow-brutal-sm">
+                  <h4 className="font-headline font-bold text-rt-ink uppercase text-sm border-b border-rt-ink/20 pb-1.5">Surface Durability</h4>
+                  <div className="flex justify-between py-1 border-b border-rt-ink/10">
+                    <span className="text-rt-secondary-text font-bold">Surface Type:</span>
+                    <span className="text-rt-ink font-bold">{road.surface}</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-rt-ink/10">
+                    <span className="text-rt-secondary-text font-bold">Repairs Executed:</span>
+                    <span className="text-rt-ink font-bold">{road.total_work_orders} Historical Work Orders</span>
+                  </div>
+                  <div className="flex justify-between py-1">
+                    <span className="text-rt-secondary-text font-bold">Citizen Inspection:</span>
+                    <span className="text-rt-mint font-bold">Eligible for Photo Audit</span>
+                  </div>
+                </div>
               </div>
-            )}
-          </div>
+            </div>
+          )
         )}
 
         {/* CHAPTER 6 — Accountability & Cases */}

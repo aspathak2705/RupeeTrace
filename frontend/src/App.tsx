@@ -80,11 +80,20 @@ const AppContent: React.FC = () => {
         if (roadId) {
           setSelectedRoadId(decodeURIComponent(roadId));
           setInvestigateMode('passport');
-          setActiveView('investigate');
+          setActiveView(isOfficer ? 'investigate' : 'explore-roads');
         }
       } else if (hash.startsWith('graph')) {
         setInvestigateMode('graph');
         setActiveView('investigate');
+      } else if (hash.startsWith('explore-roads')) {
+        setInvestigateMode('passport');
+        setActiveView('explore-roads');
+      } else if (hash.startsWith('report-issue')) {
+        setActiveView('report-issue');
+      } else if (hash.startsWith('my-activity') || hash.startsWith('activity')) {
+        setActiveView('my-activity');
+      } else if (hash.startsWith('citizen-mgmt')) {
+        setActiveView('citizen-mgmt');
       } else if (hash.startsWith('investigate')) {
         setActiveView('investigate');
       } else if (hash.startsWith('audits')) {
@@ -98,7 +107,7 @@ const AppContent: React.FC = () => {
       } else if (hash.startsWith('next-rupee')) {
         setActiveView('next-rupee');
       } else if (hash.startsWith('cases') || hash.startsWith('portal')) {
-        setActiveView('portal');
+        setActiveView(isOfficer ? 'citizen-mgmt' : 'report-issue');
       } else if (hash.startsWith('janmat')) {
         setActiveView('janmat');
       } else if (hash.startsWith('overview') || hash.startsWith('money-trail')) {
@@ -115,8 +124,14 @@ const AppContent: React.FC = () => {
 
   const navigateToView = (view: string) => {
     // If citizen tries to navigate to officer-only views, display access gate
-    if (isCitizen && (view === 'accountability' || view === 'next-rupee')) {
-      setRestrictedTarget(view === 'accountability' ? 'DLP Sentinel & Forensic Audits' : 'Next Rupee Planner & Budget Simulator');
+    if (isCitizen && (view === 'accountability' || view === 'next-rupee' || view === 'citizen-mgmt')) {
+      setRestrictedTarget(
+        view === 'accountability'
+          ? 'DLP Sentinel & Forensic Audits'
+          : view === 'next-rupee'
+          ? 'Next Rupee Planner & Budget Simulator'
+          : 'Officer Citizen Management Triage'
+      );
       setActiveView(view);
       window.location.hash = `#/${view}`;
       return;
@@ -129,7 +144,7 @@ const AppContent: React.FC = () => {
   const handleOpenPassport = (roadId: string) => {
     setSelectedRoadId(roadId);
     setInvestigateMode('passport');
-    setActiveView('investigate');
+    setActiveView(isOfficer ? 'investigate' : 'explore-roads');
     window.location.hash = `#/passport/${encodeURIComponent(roadId)}`;
   };
 
@@ -183,7 +198,7 @@ const AppContent: React.FC = () => {
         navigateToView('accountability');
         break;
       case 6: // Step 6: 7-Stage Citizen Verification & Cases
-        navigateToView('portal');
+        navigateToView(isOfficer ? 'citizen-mgmt' : 'report-issue');
         break;
       case 7: // Step 7: Next Rupee Planner 2.0 (Budget Simulator & IRC Materials)
         if (!isOfficer) {
@@ -236,7 +251,7 @@ const AppContent: React.FC = () => {
           <CitizenLandingView
             currentWard={selectedWard}
             onNavigatePassport={handleOpenPassport}
-            onNavigateVerification={() => navigateToView('portal')}
+            onNavigateVerification={() => navigateToView('report-issue')}
             onNavigateJanmat={() => navigateToView('janmat')}
             onNavigateWardOverview={() => navigateToView('overview')}
           />
@@ -266,11 +281,29 @@ const AppContent: React.FC = () => {
                 navigateToView('next-rupee');
               }
             }}
-            onNavigatePortal={() => navigateToView('portal')}
+            onNavigatePortal={() => navigateToView(isOfficer ? 'citizen-mgmt' : 'report-issue')}
           />
         )}
 
-        {/* VIEW 2: INVESTIGATE (Road Passport / Visual Money Trace Board) */}
+        {/* VIEW 2: EXPLORE ROADS (Citizen-Facing Road Passport) */}
+        {activeView === 'explore-roads' && (
+          <InvestigateView
+            currentRoadId={selectedRoadId}
+            onSelectRoad={handleOpenPassport}
+            onSelectWorkOrder={(woId) => setActiveWorkOrderId(woId)}
+            onNavigateToWard={(code) => {
+              setSelectedWard(code);
+              navigateToView('overview');
+            }}
+            onNavigateCreateCase={(roadId) => {
+              setSelectedRoadId(roadId);
+              navigateToView('report-issue');
+            }}
+            initialMode="passport"
+          />
+        )}
+
+        {/* VIEW 3: INVESTIGATE (Officer Scoped Investigation Board & Graph) */}
         {activeView === 'investigate' && (
           <InvestigateView
             currentRoadId={selectedRoadId}
@@ -282,13 +315,13 @@ const AppContent: React.FC = () => {
             }}
             onNavigateCreateCase={(roadId) => {
               setSelectedRoadId(roadId);
-              navigateToView('portal');
+              navigateToView('citizen-mgmt');
             }}
             initialMode={investigateMode}
           />
         )}
 
-        {/* VIEW 3: ACCOUNTABILITY (DLP Sentinel, Scorecards, Tenders) */}
+        {/* VIEW 4: ACCOUNTABILITY (DLP Sentinel, Scorecards, Tenders) */}
         {activeView === 'accountability' && (
           isCitizen ? (
             <AccessRestrictedGate
@@ -311,7 +344,7 @@ const AppContent: React.FC = () => {
           )
         )}
 
-        {/* VIEW 4: NEXT RUPEE (Budget Simulator, Knapsack, IRC Materials) */}
+        {/* VIEW 5: NEXT RUPEE (Budget Simulator, Knapsack, IRC Materials) */}
         {activeView === 'next-rupee' && (
           isCitizen ? (
             <AccessRestrictedGate
@@ -332,15 +365,59 @@ const AppContent: React.FC = () => {
           )
         )}
 
-        {/* VIEW 5: PUBLIC PORTAL & CASES / JANMAT */}
-        {(activeView === 'portal' || activeView === 'janmat') && (
+        {/* VIEW 6: REPORT ISSUE (Citizen Reporting & 7-Stage Verify) */}
+        {activeView === 'report-issue' && (
           <PublicPortalView
             initialRoadId={selectedRoadId}
             currentWard={selectedWard}
-            role={user?.role || 'citizen'}
+            role="citizen"
             onOpenPassport={handleOpenPassport}
             onOpenWorkOrder={(woId) => setActiveWorkOrderId(woId)}
+            initialTab="verify"
           />
+        )}
+
+        {/* VIEW 7: JANMAT (Citizen Participatory Voting) */}
+        {activeView === 'janmat' && (
+          <PublicPortalView
+            initialRoadId={selectedRoadId}
+            currentWard={selectedWard}
+            role="citizen"
+            onOpenPassport={handleOpenPassport}
+            onOpenWorkOrder={(woId) => setActiveWorkOrderId(woId)}
+            initialTab="janmat"
+          />
+        )}
+
+        {/* VIEW 8: MY ACTIVITY (Citizen Tracking Hub) */}
+        {activeView === 'my-activity' && (
+          <PublicPortalView
+            initialRoadId={selectedRoadId}
+            currentWard={selectedWard}
+            role="citizen"
+            onOpenPassport={handleOpenPassport}
+            onOpenWorkOrder={(woId) => setActiveWorkOrderId(woId)}
+            initialTab="activity"
+          />
+        )}
+
+        {/* VIEW 9: CITIZEN MANAGEMENT (Officer Triage & Response Dispatch) */}
+        {activeView === 'citizen-mgmt' && (
+          isCitizen ? (
+            <AccessRestrictedGate
+              workspaceName="Citizen Management Triage"
+              onOpenLogin={() => setShowLoginModal(true)}
+            />
+          ) : (
+            <PublicPortalView
+              initialRoadId={selectedRoadId}
+              currentWard={selectedWard}
+              role="officer"
+              onOpenPassport={handleOpenPassport}
+              onOpenWorkOrder={(woId) => setActiveWorkOrderId(woId)}
+              initialTab="cases"
+            />
+          )
         )}
 
       </main>

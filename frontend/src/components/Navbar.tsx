@@ -34,19 +34,19 @@ export const Navbar: React.FC<Props> = ({
   const { user, isOfficer } = useAuth();
 
   const citizenTabs = [
-    { id: 'citizen-home', label: '1. Citizen Home', icon: Compass },
-    { id: 'overview', label: '2. Ward Transparency', icon: TrendingUp },
-    { id: 'investigate', label: '3. Road Passport', icon: Compass, badge: 'PUBLIC SPECS', badgeColor: 'bg-rt-primary' },
-    { id: 'portal', label: '4. Report & 7-Stage Verify', icon: CheckSquare, badge: 'ESCROW PROOF', badgeColor: 'bg-rt-mint' },
-    { id: 'janmat', label: '5. JANMAT Community Voting', icon: Vote, badge: 'DEMOCRATIC', badgeColor: 'bg-rt-primary' }
+    { id: 'citizen-home', label: 'Home', icon: Compass },
+    { id: 'explore-roads', label: 'Explore Roads', icon: Search, badge: 'ROAD PASSPORT', badgeColor: 'bg-rt-primary' },
+    { id: 'report-issue', label: 'Report Issue', icon: CheckSquare, badge: '7-STAGE VERIFY', badgeColor: 'bg-rt-mint' },
+    { id: 'janmat', label: 'JANMAT', icon: Vote, badge: 'VOTING', badgeColor: 'bg-rt-primary' },
+    { id: 'my-activity', label: 'My Activity', icon: UserCheck, badge: 'TRACKER', badgeColor: 'bg-white' }
   ];
 
   const officerTabs = [
-    { id: 'overview', label: '1. Ward Overview & Money Trail', icon: TrendingUp },
-    { id: 'investigate', label: '2. Visual Money Trace Board', icon: Network, badge: '6 MODES', badgeColor: 'bg-rt-primary' },
-    { id: 'accountability', label: '3. DLP Sentinel & Audits', icon: ShieldAlert, badge: 'FORENSIC', badgeColor: 'bg-rt-coral text-white' },
-    { id: 'next-rupee', label: '4. Next Rupee & Simulator', icon: Award, badge: 'PLANNER 2.0', badgeColor: 'bg-rt-primary' },
-    { id: 'portal', label: '5. Field Verification Triage', icon: CheckSquare, badge: 'OFFICER DISPOSITION', badgeColor: 'bg-rt-mint' }
+    { id: 'overview', label: 'Overview', icon: TrendingUp },
+    { id: 'investigate', label: 'Investigate', icon: Network, badge: '6 MODES', badgeColor: 'bg-rt-primary' },
+    { id: 'accountability', label: 'Accountability', icon: ShieldAlert, badge: 'DLP & AUDIT', badgeColor: 'bg-rt-coral text-white' },
+    { id: 'next-rupee', label: 'Next Rupee', icon: Award, badge: 'PLANNER 2.0', badgeColor: 'bg-rt-primary' },
+    { id: 'citizen-mgmt', label: 'Citizen Management', icon: CheckSquare, badge: 'TRIAGE', badgeColor: 'bg-rt-mint' }
   ];
 
   const currentTabs = isOfficer ? officerTabs : citizenTabs;

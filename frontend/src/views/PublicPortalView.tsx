@@ -3,8 +3,9 @@ import {
   MessageSquare, User, ShieldCheck, Send, CheckCircle2,
   Clock, AlertTriangle, ExternalLink, FileText, ArrowRight,
   Filter, PlusCircle, CornerDownRight, Shield, Camera,
-  AlertOctagon, CheckSquare, Vote, Sparkles
+  AlertOctagon, CheckSquare, Vote, Sparkles, UserCheck, Compass
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import { api } from '../api/client';
 import { CaseRecord, RoadSummary, CivicProposal, RoadVerificationSummary } from '../types';
 import { CitizenOfficerCasesView } from './CitizenOfficerCasesView';
@@ -15,6 +16,7 @@ interface Props {
   role: 'citizen' | 'officer';
   onOpenPassport: (roadId: string) => void;
   onOpenWorkOrder: (woId: string) => void;
+  initialTab?: 'verify' | 'cases' | 'janmat' | 'activity';
 }
 
 export const PublicPortalView: React.FC<Props> = ({
@@ -22,14 +24,23 @@ export const PublicPortalView: React.FC<Props> = ({
   currentWard,
   role,
   onOpenPassport,
-  onOpenWorkOrder
+  onOpenWorkOrder,
+  initialTab = 'verify'
 }) => {
-  const [activeTab, setActiveTab] = useState<'verify' | 'cases' | 'janmat'>('verify');
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<'verify' | 'cases' | 'janmat' | 'activity'>(initialTab);
   const [verificationSummary, setVerificationSummary] = useState<RoadVerificationSummary | null>(null);
   const [proposals, setProposals] = useState<CivicProposal[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isVerified, setIsVerified] = useState<boolean>(false);
   const [isConflict, setIsConflict] = useState<boolean>(false);
+
+  // Sync initialTab when changed from outside
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
 
   useEffect(() => {
     setLoading(true);
@@ -146,6 +157,21 @@ export const PublicPortalView: React.FC<Props> = ({
               <span>JANMAT VOTING</span>
               <span className="text-[9px] bg-white px-1 py-0.2 rounded border border-rt-ink font-mono font-bold">
                 COMMUNITY
+              </span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('activity')}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-[4px] border-2 border-rt-ink font-headline font-black text-xs transition-all whitespace-nowrap ${
+                activeTab === 'activity'
+                  ? 'bg-rt-primary text-rt-ink shadow-brutal-sm'
+                  : 'bg-white hover:bg-rt-canvas text-rt-ink'
+              }`}
+            >
+              <UserCheck className="w-3.5 h-3.5" />
+              <span>MY ACTIVITY</span>
+              <span className="text-[9px] bg-white px-1 py-0.2 rounded border border-rt-ink font-mono font-bold">
+                TRACKER
               </span>
             </button>
           </div>
@@ -389,6 +415,181 @@ export const PublicPortalView: React.FC<Props> = ({
               ))}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* SUB-VIEW 4: MY CIVIC ACTIVITY & ESCROW DEFENSE */}
+      {activeTab === 'activity' && (
+        <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
+          
+          {/* Hero Profile Banner */}
+          <div className="p-6 bg-rt-primary border-3 border-rt-ink rounded-[6px] shadow-brutal flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded-[3px] text-xs font-mono font-black bg-white border border-rt-ink text-rt-ink flex items-center gap-1 shadow-[1px_1px_0px_#171717]">
+                  <UserCheck className="w-3.5 h-3.5" />
+                  AUTHENTICATED CIVIC AUDITOR
+                </span>
+                <span className="px-2 py-0.5 rounded-[3px] text-xs font-mono font-bold bg-rt-mint text-rt-ink border border-rt-ink">
+                  WARD {currentWard}
+                </span>
+              </div>
+              <h2 className="text-2xl font-headline font-black text-rt-ink">
+                {user?.name || 'Citizen Sunita Sharma'}’s Activity Hub
+              </h2>
+              <p className="text-xs font-mono text-rt-ink">
+                Track your submitted road issues, field photograph verifications, warranty escrow holds, and JANMAT participatory votes.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setActiveTab('cases')}
+                className="px-4 py-2 bg-rt-ink text-white hover:bg-neutral-800 border-2 border-rt-ink rounded font-headline font-black text-xs uppercase shadow-brutal"
+              >
+                + Report New Issue
+              </button>
+            </div>
+          </div>
+
+          {/* Metric KPI Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="p-4 bg-white border-2 border-rt-ink rounded-[4px] shadow-brutal-sm space-y-1">
+              <span className="text-[10px] font-mono font-bold uppercase text-rt-secondary-text">Issues Logged</span>
+              <div className="font-headline font-black text-2xl text-rt-ink">2</div>
+              <span className="text-[10px] font-mono text-rt-mint font-bold">1 Action Taken</span>
+            </div>
+
+            <div className="p-4 bg-white border-2 border-rt-ink rounded-[4px] shadow-brutal-sm space-y-1">
+              <span className="text-[10px] font-mono font-bold uppercase text-rt-secondary-text">Verifications</span>
+              <div className="font-headline font-black text-2xl text-rt-ink">3</div>
+              <span className="text-[10px] font-mono text-rt-coral font-bold">1 Conflict Flagged</span>
+            </div>
+
+            <div className="p-4 bg-white border-2 border-rt-ink rounded-[4px] shadow-brutal-sm space-y-1">
+              <span className="text-[10px] font-mono font-bold uppercase text-rt-secondary-text">Escrow Protected</span>
+              <div className="font-headline font-black text-2xl text-rt-ink">₹4.2L</div>
+              <span className="text-[10px] font-mono text-rt-ink font-bold">Defect Liability Hold</span>
+            </div>
+
+            <div className="p-4 bg-white border-2 border-rt-ink rounded-[4px] shadow-brutal-sm space-y-1">
+              <span className="text-[10px] font-mono font-bold uppercase text-rt-secondary-text">JANMAT Votes</span>
+              <div className="font-headline font-black text-2xl text-rt-ink">2</div>
+              <span className="text-[10px] font-mono text-rt-secondary-text font-bold">Ward K/E Projects</span>
+            </div>
+          </div>
+
+          {/* Activity Log Cards */}
+          <div className="p-6 bg-white border-3 border-rt-ink rounded-[6px] shadow-brutal space-y-4">
+            <div className="flex items-center justify-between border-b-2 border-rt-ink pb-3">
+              <h3 className="font-headline font-black text-base text-rt-ink uppercase tracking-wider flex items-center gap-2">
+                <Clock className="w-4 h-4 text-rt-primary" />
+                Submitted Records &amp; Municipal Responses
+              </h3>
+              <span className="text-xs font-mono font-bold bg-rt-canvas px-2 py-0.5 rounded border border-rt-ink">
+                4 Recent Actions
+              </span>
+            </div>
+
+            <div className="space-y-3">
+              {/* Record 1 */}
+              <div className="p-4 bg-rt-canvas border-2 border-rt-ink rounded-[4px] shadow-brutal-sm space-y-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rt-primary border border-rt-ink">
+                      CASE #BMC-2025-0891
+                    </span>
+                    <span className="font-headline font-bold text-xs text-rt-ink">
+                      Waterlogging and unraveling asphalt after rain
+                    </span>
+                  </div>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white text-rt-ink border border-rt-ink self-start sm:self-auto">
+                    Action Taken
+                  </span>
+                </div>
+                <p className="text-xs font-mono text-rt-secondary-text">
+                  Asset: <button onClick={() => onOpenPassport('RD0140')} className="font-bold underline text-rt-ink hover:text-rt-coral">Marol Maroshi Road (RD0140)</button> • Submitted 14 days ago
+                </p>
+                <div className="p-2.5 bg-white rounded border border-rt-ink font-mono text-xs space-y-1">
+                  <div className="flex items-center gap-1.5 font-bold text-rt-ink">
+                    <ShieldCheck className="w-3.5 h-3.5 text-rt-mint" />
+                    <span>Officer Response from Er. R. K. Patil (Executive Engineer):</span>
+                  </div>
+                  <p className="text-rt-secondary-text pl-5">
+                    "Joint inspection conducted on 04-Nov-2025. Contractor Apex Infrastructure served rectification notice under active 2-year DLP warranty clause 14. Potholes filled with polymer cold mix at zero municipal cost."
+                  </p>
+                </div>
+              </div>
+
+              {/* Record 2 */}
+              <div className="p-4 bg-rt-canvas border-2 border-rt-ink rounded-[4px] shadow-brutal-sm space-y-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rt-mint border border-rt-ink text-rt-ink">
+                      VERIFICATION #VRF-9921
+                    </span>
+                    <span className="font-headline font-bold text-xs text-rt-ink">
+                      Stage 5 Surface Texture Inspection
+                    </span>
+                  </div>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rt-mint text-rt-ink border border-rt-ink self-start sm:self-auto">
+                    Confirmed Satisfactory
+                  </span>
+                </div>
+                <p className="text-xs font-mono text-rt-secondary-text">
+                  Asset: <button onClick={() => onOpenPassport('RD0140')} className="font-bold underline text-rt-ink hover:text-rt-coral">Marol Maroshi Road (RD0140)</button> • Work Order: WO25-00600
+                </p>
+                <p className="text-xs font-mono text-rt-ink">
+                  Observation: "Surface inspected in person. Mastic asphalt level with storm drain manholes; smooth riding quality."
+                </p>
+              </div>
+
+              {/* Record 3 */}
+              <div className="p-4 bg-rt-canvas border-2 border-rt-ink rounded-[4px] shadow-brutal-sm space-y-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rt-coral text-white border border-rt-ink">
+                      VERIFICATION #VRF-4412
+                    </span>
+                    <span className="font-headline font-bold text-xs text-rt-ink">
+                      Edge Compaction Discrepancy Flag
+                    </span>
+                  </div>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rt-coral text-white border border-rt-ink self-start sm:self-auto">
+                    Conflict Flagged
+                  </span>
+                </div>
+                <p className="text-xs font-mono text-rt-secondary-text">
+                  Asset: <button onClick={() => onOpenPassport('RD0140')} className="font-bold underline text-rt-ink hover:text-rt-coral">Marol Maroshi Road (RD0140)</button>
+                </p>
+                <p className="text-xs font-mono text-rt-ink">
+                  Observation: "Loose gravel at boundary edges without bitumen seal. ₹1.8L escrow retainage hold enforced pending engineer joint audit."
+                </p>
+              </div>
+
+              {/* Record 4 */}
+              <div className="p-4 bg-rt-canvas border-2 border-rt-ink rounded-[4px] shadow-brutal-sm space-y-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white border border-rt-ink text-rt-ink">
+                      JANMAT VOTE #PRP-KE-001
+                    </span>
+                    <span className="font-headline font-bold text-xs text-rt-ink">
+                      Permeable Concrete Paver Walkways &amp; Storm Outlets
+                    </span>
+                  </div>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rt-primary text-rt-ink border border-rt-ink self-start sm:self-auto">
+                    Upvoted
+                  </span>
+                </div>
+                <p className="text-xs font-mono text-rt-secondary-text">
+                  Ward K/E Budget Priority • Est. ₹14.5 Lakh • Supported alongside 43 other residents
+                </p>
+              </div>
+
+            </div>
+          </div>
+
         </div>
       )}
 
