@@ -15,23 +15,24 @@ from rupeetrace.services.money_trail_service import MoneyTrailService
 from rupeetrace.services.audit_service import AuditService
 from rupeetrace.services.accountability_service import AccountabilityService
 from rupeetrace.services.next_rupee_service import NextRupeeService
+from rupeetrace.services.case_service import CaseService
+from rupeetrace.services.graph_service import GraphService
 
-from rupeetrace.api.routes import health, wards, roads, work_orders, audits, contractors
+from rupeetrace.api.routes import health, wards, roads, work_orders, audits, contractors, graph, cases
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Startup: Load and cache all datasets & analytical structures once
-    print(f"Initializing RupeeTrace data foundation from: {settings.DATA_DIR}")
+def init_app_state(app: FastAPI):
+    """Synchronously populates app.state so all routers and tests are immediately operational."""
+    if hasattr(app.state, "loader") and app.state.loader is not None:
+        return
+
     loader = DataLoader()
     loader.load_all()
 
     validation_svc = ValidationService(loader)
     val_report = validation_svc.run_full_validation()
-    print(f"Validation status: {val_report['status']}")
 
     rel_service = RelationshipService(loader)
 
-    # Initialize domain & intelligence engines
     app.state.loader = loader
     app.state.validation_report = val_report
     app.state.rel_service = rel_service
@@ -42,10 +43,16 @@ async def lifespan(app: FastAPI):
     app.state.audit_service = AuditService(rel_service)
     app.state.accountability_service = AccountabilityService(rel_service)
     app.state.next_rupee_service = NextRupeeService(rel_service)
+    app.state.case_service = CaseService()
+    app.state.graph_service = GraphService(rel_service)
 
     # Pre-cache audit findings
     app.state.audit_service.get_all_findings(limit=1)
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print(f"Initializing RupeeTrace data foundation from: {settings.DATA_DIR}")
+    init_app_state(app)
     print("RupeeTrace backend and intelligence engines ready.")
     yield
     print("RupeeTrace shutting down.")
@@ -73,6 +80,8 @@ app.include_router(roads.router, prefix=settings.API_PREFIX)
 app.include_router(work_orders.router, prefix=settings.API_PREFIX)
 app.include_router(audits.router, prefix=settings.API_PREFIX)
 app.include_router(contractors.router, prefix=settings.API_PREFIX)
+app.include_router(graph.router, prefix=settings.API_PREFIX)
+app.include_router(cases.router, prefix=settings.API_PREFIX)
 
 @app.get("/")
 def root():
