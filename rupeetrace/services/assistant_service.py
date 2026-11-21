@@ -4,11 +4,12 @@ import httpx
 from typing import Dict, Any, List, Optional
 from rupeetrace.services.relationship_service import RelationshipService
 from rupeetrace.core.provenance import SourceProvenance
+from rupeetrace.core.config import settings
 
 class AssistantService:
     def __init__(self, rel_service: RelationshipService):
         self.rel_service = rel_service
-        self.api_key = os.getenv("ANTHROPIC_API_KEY")
+        self.api_key = settings.ANTHROPIC_API_KEY
 
     def detect_language(self, text: str) -> str:
         """Detects whether user prompt is English, Hindi, Marathi, or Hinglish."""

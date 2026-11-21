@@ -4,7 +4,8 @@ import {
   AuditFinding, ContractorScorecard, NextRupeePlan, GraphData, CaseRecord
 } from '../types';
 
-const API_BASE = '/api';
+// Configurable API base URL with fallback to local proxy path
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '');
 
 export const api = {
   // Health

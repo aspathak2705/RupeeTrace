@@ -43,7 +43,7 @@ def create_case(request: Request, body: CreateCaseRequest):
     )
 
 @router.post("/{case_id}/respond", response_model=Dict[str, Any])
-def respond_case(request: Request, case_id: str = Path(...), body: RespondCaseRequest = None):
+def respond_case(request: Request, case_id: str, body: RespondCaseRequest):
     case_service = request.app.state.case_service
     updated = case_service.respond_case(
         case_id=case_id,

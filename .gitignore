@@ -1,31 +1,48 @@
+# Environment variables and secrets
+.env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+!.env.*.example
+
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
-*.env
 .venv/
 venv/
 ENV/
+env/
 
 # Scratch & temporary inspection files
 scratch/
 *.log
 
-# IDE
+# IDE & OS Artifacts
 .idea/
 .vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
 
-# Testing
+# Testing & Coverage
 .pytest_cache/
+.coverage
+htmlcov/
 
 # Frontend
 frontend/node_modules/
 frontend/dist/
+frontend/.vite/
 
 # SQLite databases
 *.db
 
-# ML Embedding Cache
+# ML Embedding & Model Cache
 rupeetrace/data/cache/
 *.npz
-
+*.bin

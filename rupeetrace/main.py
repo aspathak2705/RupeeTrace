@@ -61,6 +61,7 @@ def init_app_state(app: FastAPI):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    settings.validate_paths()
     print(f"Initializing RupeeTrace data foundation from: {settings.DATA_DIR}")
     init_app_state(app)
     print("RupeeTrace backend and intelligence engines ready.")
@@ -74,12 +75,12 @@ app = FastAPI(
     description="RupeeTrace: Follow the Rupee — AI-Powered Road Repair Financial Accountability Platform"
 )
 
-# CORS configuration
+# CORS configuration — strictly uses configured origins to prevent wildcard-with-credentials vulnerabilities
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -105,4 +106,4 @@ def root():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("rupeetrace.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("rupeetrace.main:app", host=settings.HOST, port=settings.PORT, reload=settings.DEBUG)

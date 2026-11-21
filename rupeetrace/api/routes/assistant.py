@@ -19,7 +19,7 @@ class ChatResponse(BaseModel):
 @router.post("/chat", response_model=ChatResponse)
 async def chat_with_assistant(request: Request, body: ChatRequest):
     assistant_service = request.app.state.assistant_service
-    if not body.question.trim() if hasattr(body.question, 'trim') else not body.question.strip():
+    if not body.question or not body.question.strip():
         raise HTTPException(status_code=400, detail="Question cannot be empty.")
 
     result = await assistant_service.answer_question(body.question.strip(), default_ward=body.default_ward)

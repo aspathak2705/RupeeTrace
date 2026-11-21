@@ -9,6 +9,7 @@ import numpy as np
 from rupeetrace.services.relationship_service import RelationshipService
 from rupeetrace.models.entities import Complaint
 from rupeetrace.core.provenance import SourceProvenance
+from rupeetrace.core.config import settings
 
 def haversine_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     R = 6371000.0  # Earth radius in meters
@@ -91,7 +92,7 @@ class MLIssueService:
         self._complaint_ids: List[str] = []
         
         # Cache paths
-        self.cache_dir = Path(os.environ.get("CACHE_DIR", Path(__file__).resolve().parent.parent / "data" / "cache"))
+        self.cache_dir = settings.CACHE_DIR
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.embeddings_cache_file = self.cache_dir / "complaint_embeddings.npz"
 
