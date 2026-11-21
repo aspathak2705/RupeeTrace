@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play, Compass, Network, ShieldAlert, Award, MessageSquare, TrendingUp } from 'lucide-react';
+import { Play, Compass, Network, ShieldAlert, Award, MessageSquare, TrendingUp, Bot } from 'lucide-react';
 
 interface DemoTourBarProps {
   onStep: (step: number) => void;
@@ -13,91 +13,60 @@ export const DemoTourBar: React.FC<DemoTourBarProps> = ({
   onOpenAssistant
 }) => {
   return (
-    <div className="bg-slate-900/90 border-b border-teal-500/30 px-4 py-2 flex flex-wrap items-center justify-between gap-2 text-xs backdrop-blur-md">
+    <aside aria-label="Demo Tour" className="bg-rt-muted border-b-2 border-rt-ink px-4 py-2 flex flex-wrap items-center justify-between gap-2 text-xs font-headline">
       <div className="flex items-center space-x-2">
-        <span className="px-2 py-0.5 rounded bg-teal-500 text-slate-950 font-bold text-[10px] uppercase tracking-wider flex items-center space-x-1">
+        <span className="px-2 py-0.5 rounded-[3px] bg-rt-primary border-2 border-rt-ink text-rt-ink font-black text-[10px] uppercase tracking-wider shadow-[1.5px_1.5px_0px_#171717] flex items-center space-x-1">
           <Play className="w-2.5 h-2.5 fill-current" />
-          <span>Demo Tour (4 Min)</span>
+          <span>4-MIN EVALUATION TOUR</span>
         </span>
-        <span className="text-slate-400 text-[11px] hidden lg:inline">
-          Step through the verified evaluation journey:
+        <span className="text-rt-secondary-text text-[11px] font-mono hidden lg:inline">
+          Official Judge Walkthrough:
         </span>
       </div>
 
       {/* Tour Buttons */}
-      <div className="flex items-center space-x-1 overflow-x-auto no-scrollbar py-0.5">
-        <button
-          onClick={() => onStep(1)}
-          className="px-2.5 py-1 rounded bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-[11px] font-medium whitespace-nowrap transition flex items-center space-x-1"
-          title="0:00–0:40: Ward K/E Money Trail"
-        >
-          <TrendingUp className="w-3 h-3 text-indigo-400" />
-          <span>1. Ward Trail</span>
-        </button>
-
-        <button
-          onClick={() => onStep(2)}
-          className="px-2.5 py-1 rounded bg-slate-950 hover:bg-slate-800 border border-teal-500/40 text-teal-300 hover:text-white text-[11px] font-semibold whitespace-nowrap transition flex items-center space-x-1"
-          title="0:40–1:35: Featured Road Passport (RD0140)"
-        >
-          <Compass className="w-3 h-3 text-teal-400" />
-          <span>2. Road Passport</span>
-        </button>
-
-        <button
-          onClick={() => onStep(3)}
-          className="px-2.5 py-1 rounded bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-[11px] font-medium whitespace-nowrap transition flex items-center space-x-1"
-          title="Visual Money Trace Graph"
-        >
-          <Network className="w-3 h-3 text-teal-400" />
-          <span>3. Trace Graph</span>
-        </button>
-
-        <button
-          onClick={() => onStep(4)}
-          className="px-2.5 py-1 rounded bg-slate-950 hover:bg-slate-800 border border-rose-500/40 text-rose-300 hover:text-white text-[11px] font-semibold whitespace-nowrap transition flex items-center space-x-1"
-          title="1:35–2:20: Work Order Audit (WO25-00600 +129% deviation)"
-        >
-          <ShieldAlert className="w-3 h-3 text-rose-400" />
-          <span>4. Audit Flag</span>
-        </button>
-
-        <button
-          onClick={() => onStep(5)}
-          className="px-2.5 py-1 rounded bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-[11px] font-medium whitespace-nowrap transition flex items-center space-x-1"
-          title="2:20–3:05: Contractor Scorecard (CT03)"
-        >
-          <Award className="w-3 h-3 text-blue-400" />
-          <span>5. Contractors</span>
-        </button>
-
-        <button
-          onClick={() => onStep(6)}
-          className="px-2.5 py-1 rounded bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-[11px] font-medium whitespace-nowrap transition flex items-center space-x-1"
-          title="3:05–3:40: Citizen & Officer Workflow"
-        >
-          <MessageSquare className="w-3 h-3 text-emerald-400" />
-          <span>6. Case Dialogue</span>
-        </button>
-
-        <button
-          onClick={() => onStep(7)}
-          className="px-2.5 py-1 rounded bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-[11px] font-medium whitespace-nowrap transition flex items-center space-x-1"
-          title="3:40–4:00: Next Rupee Planner"
-        >
-          <Compass className="w-3 h-3 text-amber-400" />
-          <span>7. Next Rupee</span>
-        </button>
+      <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-0.5">
+        {[
+          { step: 1, label: '1. Ward Trail', icon: TrendingUp, title: 'Ward K/E Budget vs Expenditure' },
+          { step: 2, label: '2. Road Passport', icon: Compass, title: 'Featured Road Passport (RD0140)', highlight: true },
+          { step: 3, label: '3. Trace Graph', icon: Network, title: 'Interactive Visual Money Trace Graph' },
+          { step: 4, label: '4. Audit Flag', icon: ShieldAlert, title: 'Work Order WO25-00600 (+129.5% Variance)', coral: true },
+          { step: 5, label: '5. Contractors', icon: Award, title: 'Context-Aware Contractor Scorecards' },
+          { step: 6, label: '6. Case Dialogue', icon: MessageSquare, title: 'Shared Citizen/Officer Case Workflow' },
+          { step: 7, label: '7. Next Rupee', icon: Compass, title: 'Next Rupee Capital Prioritization' }
+        ].map(item => {
+          const Icon = item.icon;
+          return (
+            <button
+              key={item.step}
+              onClick={() => onStep(item.step)}
+              className={`px-2.5 py-1 rounded-[3px] border-2 border-rt-ink text-[11px] font-bold whitespace-nowrap transition-transform duration-75 active:translate-x-[1px] active:translate-y-[1px] shadow-brutal-sm hover:shadow-brutal flex items-center space-x-1 ${
+                item.coral
+                  ? 'bg-rt-coral text-white'
+                  : item.highlight
+                  ? 'bg-rt-primary text-rt-ink'
+                  : 'bg-white hover:bg-yellow-50 text-rt-ink'
+              }`}
+              title={item.title}
+            >
+              <Icon className="w-3 h-3 shrink-0" />
+              <span>{item.label}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* AI Assistant Quick Pill */}
       <button
         onClick={onOpenAssistant}
-        className="px-2.5 py-1 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white rounded text-[11px] font-bold shadow transition flex items-center space-x-1"
+        className="px-3 py-1 bg-rt-primary hover:bg-yellow-300 text-rt-ink border-2 border-rt-ink rounded-[4px] text-[11px] font-extrabold shadow-brutal-sm hover:shadow-brutal transition-all flex items-center space-x-1.5"
       >
+        <Bot className="w-3.5 h-3.5" />
         <span>Ask AI Assistant</span>
-        <span className="text-[10px] bg-slate-950/40 px-1 py-0.2 rounded font-mono">हि/म/EN</span>
+        <span className="text-[9px] bg-white px-1 py-0.2 rounded border border-rt-ink font-mono font-bold">
+          हि/म/EN
+        </span>
       </button>
-    </div>
+    </aside>
   );
 };

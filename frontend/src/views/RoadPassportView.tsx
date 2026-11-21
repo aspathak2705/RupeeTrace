@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
   Compass, QrCode, GitBranch, ShieldAlert, CheckCircle2, Clock,
   AlertTriangle, FileText, ArrowRight, Activity, Building, MapPin,
-  ExternalLink, Calendar, Car, AlertOctagon, HeartHandshake, Eye
+  ExternalLink, Calendar, Car, AlertOctagon, HeartHandshake, Eye, Printer
 } from 'lucide-react';
 import { RoadDetail, Complaint, WorkOrder, RoadFinancialHistory, AuditFinding, CaseRecord } from '../types';
 import { api } from '../api/client';
@@ -55,19 +55,21 @@ export const RoadPassportView: React.FC<Props> = ({
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[65vh] text-slate-400">
-        <div className="w-10 h-10 border-2 border-accent-emerald border-t-transparent rounded-full animate-spin mb-3"></div>
-        <p className="text-sm font-medium">Assembling Road Passport for {roadId}...</p>
+      <div className="flex flex-col items-center justify-center min-h-[65vh] text-rt-secondary-text font-body">
+        <div className="w-10 h-10 border-3 border-rt-ink border-t-transparent rounded-full animate-spin mb-3"></div>
+        <p className="text-sm font-mono font-bold uppercase tracking-wider text-rt-ink">
+          Assembling Official Road Passport for {roadId}...
+        </p>
       </div>
     );
   }
 
   if (error || !road) {
     return (
-      <div className="max-w-3xl mx-auto my-12 p-8 bg-navy-900 border border-rose-500/30 rounded-2xl text-center">
-        <AlertTriangle className="w-10 h-10 text-accent-rose mx-auto mb-3" />
-        <h2 className="text-xl font-bold text-white mb-1">Road Asset {roadId} Not Found</h2>
-        <p className="text-xs text-slate-400 mb-4">{error || 'Asset not registered in database.'}</p>
+      <div className="max-w-3xl mx-auto my-12 p-8 bg-white border-3 border-rt-ink rounded-[4px] shadow-brutal text-center font-body">
+        <AlertTriangle className="w-10 h-10 text-rt-coral mx-auto mb-3" />
+        <h2 className="text-2xl font-headline font-black text-rt-ink mb-1">Road Asset {roadId} Not Found</h2>
+        <p className="text-xs font-mono text-rt-secondary-text mb-4">{error || 'Asset not registered in verified database.'}</p>
       </div>
     );
   }
@@ -87,7 +89,7 @@ export const RoadPassportView: React.FC<Props> = ({
       date: c.received_at,
       type: 'complaint',
       title: `Citizen Complaint: ${c.category_reported}`,
-      subtitle: `${c.channel} • Anonymized User • ${c.status}`,
+      subtitle: `${c.channel} • Anonymized Complainant • ${c.status}`,
       statusBadge: c.status,
       recordId: c.complaint_id
     });
@@ -99,7 +101,7 @@ export const RoadPassportView: React.FC<Props> = ({
         date: wo.completed_at || wo.assigned_at,
         type: 'work_order',
         title: `Repair Completed: ${wo.repair_method}`,
-        subtitle: `Contractor: ${wo.contractor_name} • Billed: ₹${wo.recorded_billed_cost_inr.toLocaleString()} • ${wo.sla_met ? 'SLA Met' : 'Missed SLA'}`,
+        subtitle: `Contractor: ${wo.contractor_name} • Billed: ₹${wo.recorded_billed_cost_inr.toLocaleString('en-IN')} • ${wo.sla_met ? 'SLA Met' : 'Missed SLA'}`,
         statusBadge: wo.reopened_within_30d ? 'Reopened in 30d' : 'Held Up',
         recordId: wo.work_order_id
       });
@@ -121,43 +123,39 @@ export const RoadPassportView: React.FC<Props> = ({
   timelineItems.sort((a, b) => b.date.localeCompare(a.date));
 
   return (
-    <div className="space-y-8 animate-fadeIn pb-16">
+    <div className="p-6 max-w-7xl mx-auto space-y-8 font-body pb-20">
       
-      {/* Canonical Passport Header */}
-      <div className="p-6 sm:p-8 bg-gradient-to-b from-navy-900 to-navy-950 border border-slate-800 rounded-3xl shadow-xl relative overflow-hidden">
-        {/* Synthetic Watermark */}
-        <div className="absolute -right-8 -bottom-10 select-none opacity-5 pointer-events-none">
-          <Compass className="w-80 h-80 text-white" />
-        </div>
-
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+      {/* Canonical Passport Official Header */}
+      <div className="p-6 sm:p-8 bg-white border-3 border-rt-ink rounded-[6px] shadow-brutal-xl relative overflow-hidden">
+        {/* Top Watermark / Asset Stamp */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10 border-b-2 border-rt-ink pb-6">
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-2">
-              <span className="px-2.5 py-1 rounded-md text-xs font-mono font-bold bg-accent-emerald/20 text-accent-emerald border border-accent-emerald/30">
+              <span className="px-2.5 py-0.5 rounded-[3px] text-xs font-mono font-bold bg-rt-primary border border-rt-ink text-rt-ink shadow-[1.5px_1.5px_0px_#171717]">
                 ROAD PASSPORT • {road.road_id}
               </span>
-              <span className="text-xs text-slate-400 font-mono">
-                Ward {road.ward_code} • Segment #{road.segment_no}
+              <span className="text-xs font-mono font-bold text-rt-ink bg-rt-canvas px-2 py-0.5 rounded border border-rt-ink">
+                WARD {road.ward_code} • SEGMENT #{road.segment_no}
               </span>
               {road.under_dlp ? (
-                <span className="px-2 py-0.5 rounded text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-1">
+                <span className="px-2 py-0.5 rounded-[3px] text-xs font-bold bg-rt-coral text-white border border-rt-ink flex items-center gap-1 shadow-[1px_1px_0px_#171717]">
                   <ShieldAlert className="w-3.5 h-3.5" />
-                  Under DLP Warranty
+                  UNDER DLP WARRANTY
                 </span>
               ) : (
-                <span className="px-2 py-0.5 rounded text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">
-                  DLP Expired
+                <span className="px-2 py-0.5 rounded-[3px] text-xs font-bold bg-rt-muted text-rt-ink border border-rt-ink">
+                  DLP EXPIRED
                 </span>
               )}
               <EvidenceBadge provenance={road.provenance} />
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-headline font-black text-rt-ink tracking-tight">
               {road.road_name}
             </h1>
 
-            <p className="text-xs text-slate-400 mt-1 max-w-2xl">
-              Canonical Asset Identity: <strong className="text-slate-300 font-mono">{road.road_id}</strong>. 
+            <p className="text-xs font-mono text-rt-secondary-text mt-1.5 max-w-2xl">
+              Canonical Asset Identity: <strong className="text-rt-ink font-bold">{road.road_id}</strong>. 
               Coordinates: ({road.start_lat.toFixed(4)}, {road.start_lon.toFixed(4)}) to ({road.end_lat.toFixed(4)}, {road.end_lon.toFixed(4)}).
             </p>
           </div>
@@ -166,75 +164,75 @@ export const RoadPassportView: React.FC<Props> = ({
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             <button
               onClick={() => setShowQRModal(true)}
-              className="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-xl bg-navy-800 hover:bg-navy-700 text-slate-200 border border-slate-700 shadow-sm transition-all"
+              className="flex items-center gap-2 px-4 py-2.5 text-xs font-headline font-bold rounded-[4px] bg-white hover:bg-rt-canvas text-rt-ink border-2 border-rt-ink shadow-brutal-sm hover:shadow-brutal active:translate-x-[1px] active:translate-y-[1px] transition-all"
             >
-              <QrCode className="w-4 h-4 text-accent-teal" />
-              Passport QR Tag
+              <QrCode className="w-4 h-4 text-rt-ink" />
+              <span>Asset QR Tag</span>
             </button>
 
             <button
               onClick={() => onNavigateGraph(road.road_id)}
-              className="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-xl bg-accent-teal/20 hover:bg-accent-teal/30 text-accent-teal border border-accent-teal/40 transition-all"
+              className="flex items-center gap-2 px-4 py-2.5 text-xs font-headline font-bold rounded-[4px] bg-rt-primary hover:bg-yellow-300 text-rt-ink border-2 border-rt-ink shadow-brutal-sm hover:shadow-brutal active:translate-x-[1px] active:translate-y-[1px] transition-all"
             >
-              <GitBranch className="w-4 h-4" />
-              Trace Money Graph
+              <GitBranch className="w-4 h-4 text-rt-ink" />
+              <span>Trace Money Graph</span>
             </button>
           </div>
         </div>
 
         {/* Quick Spec Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 mt-6 pt-6 border-t border-slate-800/80 text-xs">
-          <div>
-            <span className="text-[11px] text-slate-400 block">Road Classification</span>
-            <span className="font-semibold text-slate-100">{road.road_type}</span>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 mt-6 pt-2 text-xs font-mono">
+          <div className="p-3 bg-rt-canvas border border-rt-ink rounded-[3px]">
+            <span className="text-[10px] text-rt-secondary-text uppercase font-bold block">Classification</span>
+            <span className="font-bold text-rt-ink text-sm block mt-0.5">{road.road_type}</span>
           </div>
-          <div>
-            <span className="text-[11px] text-slate-400 block">Surface Type</span>
-            <span className="font-semibold text-slate-100">{road.surface}</span>
+          <div className="p-3 bg-rt-canvas border border-rt-ink rounded-[3px]">
+            <span className="text-[10px] text-rt-secondary-text uppercase font-bold block">Surface Engineering</span>
+            <span className="font-bold text-rt-ink text-sm block mt-0.5">{road.surface}</span>
           </div>
-          <div>
-            <span className="text-[11px] text-slate-400 block">Segment Length</span>
-            <span className="font-mono font-semibold text-slate-100">{road.length_m} m ({road.lanes} Lanes)</span>
+          <div className="p-3 bg-rt-canvas border border-rt-ink rounded-[3px]">
+            <span className="text-[10px] text-rt-secondary-text uppercase font-bold block">Length / Lanes</span>
+            <span className="font-bold text-rt-ink text-sm block mt-0.5">{road.length_m} m ({road.lanes} L)</span>
           </div>
-          <div>
-            <span className="text-[11px] text-slate-400 block">Last Resurfaced</span>
-            <span className="font-mono text-slate-200">{road.last_resurfaced || 'Not recorded'}</span>
+          <div className="p-3 bg-rt-canvas border border-rt-ink rounded-[3px]">
+            <span className="text-[10px] text-rt-secondary-text uppercase font-bold block">Last Resurfaced</span>
+            <span className="font-bold text-rt-ink text-sm block mt-0.5">{road.last_resurfaced || 'N/A'}</span>
           </div>
-          <div>
-            <span className="text-[11px] text-slate-400 block">Recorded Repair Spend</span>
-            <span className="font-mono font-bold text-accent-teal">₹{road.total_spend_inr.toLocaleString()}</span>
+          <div className="p-3 bg-rt-primary border border-rt-ink rounded-[3px]">
+            <span className="text-[10px] text-rt-ink uppercase font-bold block">Recorded Spend</span>
+            <span className="font-black font-financial text-rt-ink text-sm block mt-0.5">₹{road.total_spend_inr.toLocaleString('en-IN')}</span>
           </div>
-          <div>
-            <span className="text-[11px] text-slate-400 block">BEST Bus Corridor</span>
-            <span className="font-semibold text-slate-200">{road.bus_route ? 'YES (High Wear)' : 'Local Traffic'}</span>
+          <div className="p-3 bg-rt-canvas border border-rt-ink rounded-[3px]">
+            <span className="text-[10px] text-rt-secondary-text uppercase font-bold block">Heavy Corridor</span>
+            <span className="font-bold text-rt-ink text-sm block mt-0.5">{road.bus_route ? 'BEST Route' : 'Local'}</span>
           </div>
         </div>
 
-        <div className="mt-4 p-2.5 bg-navy-950/70 border border-slate-800 rounded-lg text-[11px] text-slate-400">
-          ⚠️ <strong>Synthetic Dataset Notice:</strong> Road geometry and repair history are synthetic civic models. Data does not represent real BMC work orders or physical road defects.
+        <div className="mt-4 p-2.5 bg-rt-muted border border-rt-ink rounded-[3px] text-[11px] font-mono text-rt-secondary-text">
+          ⚠️ <strong>SYNTHETIC ASSET DISCLAIMER:</strong> Geometry and repair histories are synthetic civic research data. Does not represent actual BMC site measurements.
         </div>
       </div>
 
-      {/* Chapter Tabs Navigation */}
-      <div className="flex items-center space-x-2 border-b border-slate-800 pb-2 overflow-x-auto no-scrollbar text-xs">
+      {/* Chapter Tabs Navigation Bar */}
+      <div className="flex items-center space-x-2 border-b-2 border-rt-ink pb-3 overflow-x-auto no-scrollbar text-xs font-headline">
         {[
-          { num: 1, name: 'Road Identity' },
-          { num: 2, name: 'Citizen History' },
-          { num: 3, name: 'Construction & Repairs' },
-          { num: 4, name: 'Money History' },
-          { num: 5, name: 'Repair Performance' },
-          { num: 6, name: 'Accountability & Cases' }
+          { num: 1, name: '01 ROAD IDENTITY' },
+          { num: 2, name: '02 CITIZEN HISTORY' },
+          { num: 3, name: '03 REPAIRS & SCOPE' },
+          { num: 4, name: '04 MONEY HISTORY' },
+          { num: 5, name: '05 DURABILITY' },
+          { num: 6, name: '06 CASES & ACTIONS' }
         ].map(ch => (
           <button
             key={ch.num}
             onClick={() => setActiveChapter(ch.num)}
-            className={`px-3 py-1.5 rounded-lg whitespace-nowrap transition-all font-medium ${
+            className={`px-3.5 py-2 rounded-[4px] whitespace-nowrap transition-all font-bold border-2 border-rt-ink ${
               activeChapter === ch.num
-                ? 'bg-accent-teal/20 text-accent-teal border border-accent-teal/40 font-bold'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-navy-900'
+                ? 'bg-rt-primary text-rt-ink shadow-brutal-sm'
+                : 'bg-white hover:bg-rt-canvas text-rt-ink shadow-[1.5px_1.5px_0px_#171717]'
             }`}
           >
-            Ch. {ch.num}: {ch.name}
+            {ch.name}
           </button>
         ))}
       </div>
@@ -244,55 +242,55 @@ export const RoadPassportView: React.FC<Props> = ({
         
         {/* CHAPTER 1 — Road Identity */}
         {activeChapter === 1 && (
-          <div className="p-6 bg-navy-900 border border-slate-800 rounded-2xl space-y-4 animate-fadeIn">
-            <h2 className="text-base font-bold text-white uppercase tracking-wider flex items-center gap-2">
-              <Compass className="w-4 h-4 text-accent-teal" />
-              Chapter 1 — Road Identity & Physical Assets
+          <div className="p-6 bg-white border-3 border-rt-ink rounded-[6px] shadow-brutal space-y-4">
+            <h2 className="text-lg font-headline font-black text-rt-ink uppercase tracking-wider flex items-center gap-2 border-b-2 border-rt-ink pb-3">
+              <Compass className="w-5 h-5 text-rt-ink" />
+              Chapter 01 — Road Identity & Physical Assets
             </h2>
-            <p className="text-xs text-slate-400 leading-relaxed">
+            <p className="text-xs font-mono text-rt-secondary-text leading-relaxed">
               Documented segment attributes from municipal arterial survey records. No sanitized promises or unverified road expansion projects are included.
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-              <div className="p-4 bg-navy-950 border border-slate-800/80 rounded-xl space-y-2 text-xs">
-                <h4 className="font-semibold text-slate-200">Segment Profile</h4>
-                <div className="flex justify-between py-1 border-b border-slate-800">
-                  <span className="text-slate-400">Road Identifier:</span>
-                  <span className="font-mono text-slate-200 font-bold">{road.road_id}</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 font-mono">
+              <div className="p-4 bg-rt-canvas border-2 border-rt-ink rounded-[4px] space-y-2.5 text-xs shadow-brutal-sm">
+                <h4 className="font-headline font-bold text-rt-ink uppercase text-sm border-b border-rt-ink/20 pb-1.5">Segment Profile</h4>
+                <div className="flex justify-between py-1 border-b border-rt-ink/10">
+                  <span className="text-rt-secondary-text font-bold">Road Identifier:</span>
+                  <span className="text-rt-ink font-bold">{road.road_id}</span>
                 </div>
-                <div className="flex justify-between py-1 border-b border-slate-800">
-                  <span className="text-slate-400">Arterial Name:</span>
-                  <span className="text-slate-200">{road.road_name}</span>
+                <div className="flex justify-between py-1 border-b border-rt-ink/10">
+                  <span className="text-rt-secondary-text font-bold">Arterial Name:</span>
+                  <span className="text-rt-ink">{road.road_name}</span>
                 </div>
-                <div className="flex justify-between py-1 border-b border-slate-800">
-                  <span className="text-slate-400">Classification:</span>
-                  <span className="text-slate-200">{road.road_type}</span>
+                <div className="flex justify-between py-1 border-b border-rt-ink/10">
+                  <span className="text-rt-secondary-text font-bold">Classification:</span>
+                  <span className="text-rt-ink">{road.road_type}</span>
                 </div>
                 <div className="flex justify-between py-1">
-                  <span className="text-slate-400">Surface Engineering:</span>
-                  <span className="text-slate-200 font-medium">{road.surface}</span>
+                  <span className="text-rt-secondary-text font-bold">Surface Engineering:</span>
+                  <span className="text-rt-ink font-bold">{road.surface}</span>
                 </div>
               </div>
 
-              <div className="p-4 bg-navy-950 border border-slate-800/80 rounded-xl space-y-2 text-xs">
-                <h4 className="font-semibold text-slate-200">Warranty & Administrative Zone</h4>
-                <div className="flex justify-between py-1 border-b border-slate-800">
-                  <span className="text-slate-400">Defect Liability Status:</span>
-                  <span className={`font-semibold ${road.under_dlp ? 'text-accent-rose' : 'text-slate-400'}`}>
-                    {road.under_dlp ? 'Active DLP Warranty' : 'Expired / Out of Warranty'}
+              <div className="p-4 bg-rt-canvas border-2 border-rt-ink rounded-[4px] space-y-2.5 text-xs shadow-brutal-sm">
+                <h4 className="font-headline font-bold text-rt-ink uppercase text-sm border-b border-rt-ink/20 pb-1.5">Warranty & Administration</h4>
+                <div className="flex justify-between py-1 border-b border-rt-ink/10">
+                  <span className="text-rt-secondary-text font-bold">Defect Liability:</span>
+                  <span className={`font-bold px-1.5 py-0.2 rounded border border-rt-ink ${road.under_dlp ? 'bg-rt-coral text-white' : 'bg-white text-rt-ink'}`}>
+                    {road.under_dlp ? 'Active DLP Warranty' : 'Expired'}
                   </span>
                 </div>
-                <div className="flex justify-between py-1 border-b border-slate-800">
-                  <span className="text-slate-400">Last Surface Resurfacing:</span>
-                  <span className="font-mono text-slate-200">{road.last_resurfaced || 'N/A'}</span>
+                <div className="flex justify-between py-1 border-b border-rt-ink/10">
+                  <span className="text-rt-secondary-text font-bold">Last Resurfaced:</span>
+                  <span className="text-rt-ink font-bold">{road.last_resurfaced || 'N/A'}</span>
                 </div>
-                <div className="flex justify-between py-1 border-b border-slate-800">
-                  <span className="text-slate-400">Public Transit Route:</span>
-                  <span className="text-slate-200">{road.bus_route ? 'BEST Heavy Vehicle Corridor' : 'Non-transit'}</span>
+                <div className="flex justify-between py-1 border-b border-rt-ink/10">
+                  <span className="text-rt-secondary-text font-bold">Transit Route:</span>
+                  <span className="text-rt-ink">{road.bus_route ? 'BEST Heavy Transit Corridor' : 'Local Traffic'}</span>
                 </div>
                 <div className="flex justify-between py-1">
-                  <span className="text-slate-400">Jurisdiction:</span>
-                  <span className="text-slate-200 font-medium">BMC Ward {road.ward_code}</span>
+                  <span className="text-rt-secondary-text font-bold">Jurisdiction:</span>
+                  <span className="text-rt-ink font-bold">BMC Ward {road.ward_code}</span>
                 </div>
               </div>
             </div>
@@ -301,55 +299,54 @@ export const RoadPassportView: React.FC<Props> = ({
 
         {/* CHAPTER 2 — Citizen History */}
         {activeChapter === 2 && (
-          <div className="p-6 bg-navy-900 border border-slate-800 rounded-2xl space-y-4 animate-fadeIn">
-            <div className="flex items-center justify-between">
+          <div className="p-6 bg-white border-3 border-rt-ink rounded-[6px] shadow-brutal space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-rt-ink pb-3">
               <div>
-                <h2 className="text-base font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-accent-teal" />
-                  Chapter 2 — Citizen History & Complaint Log ({complaints.length})
+                <h2 className="text-lg font-headline font-black text-rt-ink uppercase tracking-wider flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-rt-ink" />
+                  Chapter 02 — Citizen History & Complaint Log ({complaints.length})
                 </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs font-mono text-rt-secondary-text mt-0.5">
                   Citizen complaints linked to this road segment. All personal complainant identifiers are masked for privacy.
                 </p>
               </div>
               {onNavigateCreateCase && (
                 <button
                   onClick={() => onNavigateCreateCase(road.road_id)}
-                  className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-accent-teal/20 text-accent-teal border border-accent-teal/30 hover:bg-accent-teal/30 transition-colors"
+                  className="px-3 py-1.5 text-xs font-headline font-bold rounded-[4px] bg-rt-mint text-rt-ink border-2 border-rt-ink shadow-brutal-sm hover:shadow-brutal transition-all"
                 >
-                  + Log Citizen Observation
+                  + Log Observation
                 </button>
               )}
             </div>
 
             {complaints.length === 0 ? (
-              <div className="p-8 text-center text-slate-400 text-xs bg-navy-950 rounded-xl">
+              <div className="p-8 text-center text-rt-secondary-text text-xs bg-rt-canvas border-2 border-rt-ink rounded-[4px] font-mono">
                 No citizen complaints recorded for this road segment during the 2025 monsoon cycle.
               </div>
             ) : (
-              <div className="divide-y divide-slate-800/80 bg-navy-950 rounded-xl border border-slate-800">
+              <div className="space-y-3">
                 {complaints.map(c => (
-                  <div key={c.complaint_id} className="p-4 space-y-1.5 text-xs">
+                  <div key={c.complaint_id} className="p-4 bg-rt-canvas border-2 border-rt-ink rounded-[4px] shadow-brutal-sm text-xs space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-accent-teal">{c.complaint_id}</span>
-                        <span className="px-2 py-0.2 rounded bg-navy-850 text-slate-300 font-medium border border-slate-700">
+                        <span className="font-mono font-bold bg-rt-primary px-2 py-0.5 rounded border border-rt-ink text-rt-ink shadow-[1px_1px_0px_#171717]">
+                          {c.complaint_id}
+                        </span>
+                        <span className="px-2 py-0.5 rounded bg-white text-rt-ink font-bold border border-rt-ink">
                           {c.category_reported}
                         </span>
                       </div>
-                      <span className="text-[11px] font-mono text-slate-400">{c.received_at}</span>
+                      <span className="text-[11px] font-mono font-bold text-rt-secondary-text">{c.received_at}</span>
                     </div>
 
-                    <p className="text-slate-200 leading-relaxed font-sans">{c.description}</p>
+                    <p className="text-rt-ink leading-relaxed font-body font-medium">{c.description}</p>
 
-                    <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-[11px] text-slate-400">
-                      <span>Channel: <strong className="text-slate-300">{c.channel}</strong> • Upvotes: {c.upvotes}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 rounded bg-navy-900 border border-slate-800 text-slate-300">
-                          Status: {c.status}
-                        </span>
-                        <EvidenceBadge provenance={c.provenance} />
-                      </div>
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-[11px] font-mono text-rt-secondary-text">
+                      <span>Channel: <strong className="text-rt-ink">{c.channel}</strong> • Upvotes: {c.upvotes}</span>
+                      <span className="px-2 py-0.5 rounded bg-white border border-rt-ink text-rt-ink font-bold">
+                        Status: {c.status}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -358,343 +355,248 @@ export const RoadPassportView: React.FC<Props> = ({
           </div>
         )}
 
-        {/* CHAPTER 3 — Construction and Repairs */}
+        {/* CHAPTER 3 — Construction & Repairs */}
         {activeChapter === 3 && (
-          <div className="p-6 bg-navy-900 border border-slate-800 rounded-2xl space-y-4 animate-fadeIn">
-            <h2 className="text-base font-bold text-white uppercase tracking-wider flex items-center gap-2">
-              <Activity className="w-4 h-4 text-accent-teal" />
-              Chapter 3 — Construction & Work Order Timeline
+          <div className="p-6 bg-white border-3 border-rt-ink rounded-[6px] shadow-brutal space-y-4">
+            <h2 className="text-lg font-headline font-black text-rt-ink uppercase tracking-wider flex items-center gap-2 border-b-2 border-rt-ink pb-3">
+              <Building className="w-5 h-5 text-rt-ink" />
+              Chapter 03 — Executed Work Orders ({history?.repair_history.length || 0})
             </h2>
-            <p className="text-xs text-slate-400">
-              Chronological log of repair interventions recorded on this segment. Click any job to inspect full audit evidence.
+            <p className="text-xs font-mono text-rt-secondary-text">
+              Documented municipal road repair contracts executed on this segment. Click any work order to inspect its full evidence docket.
             </p>
 
-            {(!history || history.repair_history.length === 0) ? (
-              <div className="p-8 text-center text-slate-400 text-xs bg-navy-950 rounded-xl">
-                No recorded work orders executed on this segment during this monsoon period.
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {history.repair_history.map(wo => (
-                  <div
-                    key={wo.work_order_id}
-                    onClick={() => onSelectWorkOrder(wo.work_order_id)}
-                    className="p-4 bg-navy-950 hover:bg-navy-850 border border-slate-800 hover:border-slate-700 rounded-xl cursor-pointer transition-all space-y-2 group"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-accent-teal group-hover:underline">
-                          {wo.work_order_id}
-                        </span>
-                        <span className="font-semibold text-white">{wo.repair_method}</span>
-                      </div>
-                      <span className="font-mono font-bold text-slate-100 text-sm">
-                        ₹{wo.recorded_billed_cost_inr.toLocaleString()}
-                      </span>
-                    </div>
-
-                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
-                      <span>Contractor: <strong className="text-slate-300">{wo.contractor_name}</strong></span>
-                      <span>Completed: <strong className="text-slate-300 font-mono">{wo.completed_at}</strong></span>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px]">
-                      <span className={`px-2 py-0.5 rounded font-medium ${
-                        wo.sla_met ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
-                      }`}>
-                        {wo.sla_met ? 'Met SLA Target' : 'Missed Target SLA'}
-                      </span>
-                      {wo.reopened_within_30d && (
-                        <span className="px-2 py-0.5 rounded font-medium bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                          Reopened in 30 Days (Failed Fix)
-                        </span>
-                      )}
-                      {wo.is_dlp_breach && (
-                        <span className="px-2 py-0.5 rounded font-medium bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                          DLP Warranty Flag
-                        </span>
-                      )}
-                      <span className="ml-auto text-accent-teal flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
-                        Inspect Evidence <ArrowRight className="w-3.5 h-3.5" />
-                      </span>
-                    </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+              {(history?.repair_history || []).map(wo => (
+                <div
+                  key={wo.work_order_id}
+                  onClick={() => onSelectWorkOrder(wo.work_order_id)}
+                  className="p-4 bg-rt-canvas hover:bg-yellow-50 border-2 border-rt-ink rounded-[4px] shadow-brutal-sm cursor-pointer transition-all space-y-2"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono font-bold text-xs bg-rt-ink text-white px-2 py-0.5 rounded">
+                      {wo.work_order_id}
+                    </span>
+                    <span className="font-mono font-bold text-rt-ink text-sm font-financial">
+                      ₹{wo.recorded_billed_cost_inr.toLocaleString('en-IN')}
+                    </span>
                   </div>
-                ))}
-              </div>
-            )}
+
+                  <h4 className="text-sm font-headline font-bold text-rt-ink">{wo.repair_method}</h4>
+                  <p className="text-xs font-mono text-rt-secondary-text">
+                    Contractor: <strong className="text-rt-ink">{wo.contractor_name}</strong>
+                  </p>
+
+                  <div className="flex items-center justify-between pt-1 text-[11px] font-mono">
+                    <span className="text-rt-secondary-text">Scope: {wo.area_sqm} sqm</span>
+                    <span className={`px-1.5 py-0.2 rounded border border-rt-ink font-bold text-[10px] ${
+                      wo.reopened_within_30d ? 'bg-rt-coral text-white' : 'bg-rt-mint text-rt-ink'
+                    }`}>
+                      {wo.reopened_within_30d ? 'Reopened in 30d' : 'Held Up'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
         {/* CHAPTER 4 — Money History */}
         {activeChapter === 4 && (
-          <div className="p-6 bg-navy-900 border border-slate-800 rounded-2xl space-y-5 animate-fadeIn">
-            <h2 className="text-base font-bold text-white uppercase tracking-wider flex items-center gap-2">
-              <span className="text-accent-teal font-mono">₹</span>
-              Chapter 4 — Money History & Financial Accountability
-            </h2>
-            <p className="text-xs text-slate-400">
-              Clear reconciliation of billed work order expenditures versus standard rate card benchmarks.
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="p-4 bg-navy-950 border border-slate-800 rounded-xl">
-                <span className="text-[11px] text-slate-400 uppercase tracking-wider block">Total Recorded Billed Cost</span>
-                <span className="text-2xl font-bold font-mono text-accent-teal mt-1 block">
-                  ₹{road.total_spend_inr.toLocaleString()}
-                </span>
-                <span className="text-[10px] text-slate-400 mt-1 block">
-                  Across {road.total_work_orders} work orders
-                </span>
+          <div className="p-6 bg-white border-3 border-rt-ink rounded-[6px] shadow-brutal space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-rt-ink pb-3">
+              <div>
+                <h2 className="text-lg font-headline font-black text-rt-ink uppercase tracking-wider flex items-center gap-2">
+                  <GitBranch className="w-5 h-5 text-rt-ink" />
+                  Chapter 04 — Financial Expenditure Breakdown
+                </h2>
+                <p className="text-xs font-mono text-rt-secondary-text mt-0.5">
+                  Follow the recorded rupee across contractors, repair techniques, and rate-card variances.
+                </p>
               </div>
 
-              <div className="p-4 bg-navy-950 border border-slate-800 rounded-xl">
-                <span className="text-[11px] text-slate-400 uppercase tracking-wider block">DLP Warranty Breach Spend</span>
-                <span className="text-2xl font-bold font-mono text-accent-rose mt-1 block">
-                  ₹{(history?.dlp_breach_recorded_spend_inr || 0).toLocaleString()}
-                </span>
-                <span className="text-[10px] text-rose-300 block mt-1">
-                  Billed to BMC while road marked under warranty
-                </span>
-              </div>
-
-              <div className="p-4 bg-navy-950 border border-slate-800 rounded-xl">
-                <span className="text-[11px] text-slate-400 uppercase tracking-wider block">Repeat Repair Count</span>
-                <span className="text-2xl font-bold font-mono text-accent-amber mt-1 block">
-                  {history?.repeat_repair_count || 0}
-                </span>
-                <span className="text-[10px] text-amber-300 block mt-1">
-                  Multiple interventions on same segment
-                </span>
-              </div>
+              <button
+                onClick={() => onNavigateGraph(road.road_id)}
+                className="px-3.5 py-2 text-xs font-headline font-bold rounded-[4px] bg-rt-primary text-rt-ink border-2 border-rt-ink shadow-brutal-sm hover:shadow-brutal transition-all flex items-center space-x-1.5"
+              >
+                <span>Open in Money Trace Graph</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
             </div>
 
-            <div className="p-3.5 bg-navy-950 rounded-xl border border-slate-800 text-xs text-slate-300 space-y-1">
-              <span className="font-semibold text-slate-200 block">Municipal Accounting Boundary:</span>
-              <p className="text-slate-400 text-xs leading-relaxed">
-                RupeeTrace documents contractor billed expenditure submitted on completed jobs. No direct bank clearing vouchers or treasury disbursement records are accessible in this civic dataset.
-              </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 font-mono">
+              <div className="p-4 bg-rt-canvas border-2 border-rt-ink rounded-[4px] shadow-brutal-sm">
+                <span className="text-[10px] text-rt-secondary-text uppercase font-bold block">Total Recorded Spend</span>
+                <span className="text-2xl font-black font-financial text-rt-ink mt-1 block">
+                  ₹{road.total_spend_inr.toLocaleString('en-IN')}
+                </span>
+                <span className="text-[10px] text-rt-secondary-text block mt-1">Across all work orders</span>
+              </div>
+
+              <div className="p-4 bg-white border-2 border-rt-ink rounded-[4px] shadow-brutal-sm">
+                <span className="text-[10px] text-rt-coral uppercase font-bold block">Failed Fix Spend</span>
+                <span className="text-2xl font-bold font-financial text-rt-coral mt-1 block">
+                  ₹{history?.repair_history.filter(w => w.reopened_within_30d).reduce((a, c) => a + c.recorded_billed_cost_inr, 0).toLocaleString('en-IN') || 0}
+                </span>
+                <span className="text-[10px] text-rt-secondary-text block mt-1">Reopened within 30 days</span>
+              </div>
+
+              <div className="p-4 bg-white border-2 border-rt-ink rounded-[4px] shadow-brutal-sm">
+                <span className="text-[10px] text-rt-secondary-text uppercase font-bold block">Executed Work Orders</span>
+                <span className="text-2xl font-bold font-financial text-rt-ink mt-1 block">
+                  {history?.total_work_orders || 0}
+                </span>
+                <span className="text-[10px] text-rt-secondary-text block mt-1">Total recorded contracts</span>
+              </div>
             </div>
           </div>
         )}
 
-        {/* CHAPTER 5 — Repair Performance */}
+        {/* CHAPTER 5 — Repair Performance & Audit Findings */}
         {activeChapter === 5 && (
-          <div className="p-6 bg-navy-900 border border-slate-800 rounded-2xl space-y-5 animate-fadeIn">
-            <h2 className="text-base font-bold text-white uppercase tracking-wider flex items-center gap-2">
-              <Activity className="w-4 h-4 text-accent-emerald" />
-              Chapter 5 — Repair Performance, Safety & Flood Context
+          <div className="p-6 bg-white border-3 border-rt-ink rounded-[6px] shadow-brutal space-y-4">
+            <h2 className="text-lg font-headline font-black text-rt-ink uppercase tracking-wider flex items-center gap-2 border-b-2 border-rt-ink pb-3">
+              <ShieldAlert className="w-5 h-5 text-rt-coral" />
+              Chapter 05 — Audit Findings & Repair Durability
             </h2>
-            <p className="text-xs text-slate-400">
-              Evaluates environmental stress and traffic factors without claiming these prove physical engineering negligence.
+            <p className="text-xs font-mono text-rt-secondary-text">
+              Algorithmic screening findings: rate-card deviations, duplicate work orders, and DLP warranty expenditures.
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Traffic Box */}
-              <div className="p-4 bg-navy-950 border border-slate-800 rounded-xl text-xs space-y-2">
-                <div className="flex items-center gap-1.5 text-accent-teal font-semibold">
-                  <Car className="w-4 h-4" />
-                  Traffic Congestion Profile
-                </div>
-                {road.traffic ? (
-                  <>
-                    <div className="flex justify-between py-1 border-b border-slate-800">
-                      <span className="text-slate-400">Congestion Index (0-10):</span>
-                      <span className="font-bold text-slate-100">{road.traffic.congestion_index_0_10} / 10</span>
-                    </div>
-                    <div className="flex justify-between py-1 border-b border-slate-800">
-                      <span className="text-slate-400">Peak Hour Vehicles:</span>
-                      <span className="font-mono text-slate-200">{road.traffic.peak_hour_vehicles.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between py-1">
-                      <span className="text-slate-400">Avg Peak Speed:</span>
-                      <span className="text-slate-200">{road.traffic.avg_peak_speed_kmph} km/h</span>
-                    </div>
-                  </>
-                ) : (
-                  <p className="text-slate-500">Traffic profile not measured.</p>
-                )}
+            {auditFindings.length === 0 ? (
+              <div className="p-6 bg-rt-canvas border-2 border-rt-ink rounded-[4px] text-xs font-mono text-rt-secondary-text">
+                No active audit flags triggered for this road asset. Standard variance parameters met.
               </div>
-
-              {/* Safety & Accidents */}
-              <div className="p-4 bg-navy-950 border border-slate-800 rounded-xl text-xs space-y-2">
-                <div className="flex items-center gap-1.5 text-accent-rose font-semibold">
-                  <AlertOctagon className="w-4 h-4" />
-                  Historical Accidents ({road.accidents_recorded.length})
-                </div>
-                {road.accidents_recorded.length === 0 ? (
-                  <p className="text-slate-400">Zero recorded road accidents on this segment.</p>
-                ) : (
-                  <div className="space-y-1.5 max-h-32 overflow-y-auto pr-1">
-                    {road.accidents_recorded.map(a => (
-                      <div key={a.accident_id} className="p-1.5 rounded bg-navy-900 border border-slate-800 text-[11px]">
-                        <span className="font-bold text-slate-200">{a.severity}:</span> {a.probable_cause} ({a.vehicle_type})
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Flood Context */}
-              <div className="p-4 bg-navy-950 border border-slate-800 rounded-xl text-xs space-y-2">
-                <div className="flex items-center gap-1.5 text-accent-amber font-semibold">
-                  <MapPin className="w-4 h-4" />
-                  Chronic Flood Hotspots ({road.nearby_flood_hotspots.length})
-                </div>
-                {road.nearby_flood_hotspots.length === 0 ? (
-                  <p className="text-slate-400">No chronic flood hotspots within immediate proximity.</p>
-                ) : (
-                  <div className="space-y-1.5">
-                    {road.nearby_flood_hotspots.map(fh => (
-                      <div key={fh.hotspot_id} className="p-1.5 rounded bg-navy-900 border border-slate-800 text-[11px]">
-                        <span className="font-semibold text-slate-200">{fh.name}</span>
-                        <span className="block text-slate-400">
-                          Depth: {fh.avg_water_depth_cm} cm • Distance: {fh.distance_m ? `${fh.distance_m} m` : 'Adjacent'}
+            ) : (
+              <div className="space-y-3">
+                {auditFindings.map(af => (
+                  <div key={af.finding_id} className="p-4 bg-white border-2 border-rt-ink rounded-[4px] shadow-brutal-sm text-xs space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <span className="font-mono font-bold bg-rt-coral text-white px-2 py-0.5 rounded border border-rt-ink">
+                          {af.finding_id}
                         </span>
+                        <span className="font-headline font-bold text-rt-ink">{af.finding_type}</span>
                       </div>
-                    ))}
+                      <span className="font-mono font-bold text-rt-coral uppercase text-[10px]">{af.status}</span>
+                    </div>
+                    <p className="text-rt-ink font-body font-medium">{af.reason}</p>
+                    <div className="p-2 bg-rt-canvas rounded border border-rt-ink font-mono text-[11px] text-rt-secondary-text">
+                      Recommended Action: <strong className="text-rt-ink">{af.recommended_action}</strong>
+                    </div>
                   </div>
-                )}
+                ))}
               </div>
-            </div>
+            )}
           </div>
         )}
 
         {/* CHAPTER 6 — Accountability & Cases */}
         {activeChapter === 6 && (
-          <div className="p-6 bg-navy-900 border border-slate-800 rounded-2xl space-y-5 animate-fadeIn">
-            <div className="flex items-center justify-between">
+          <div className="p-6 bg-white border-3 border-rt-ink rounded-[6px] shadow-brutal space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-rt-ink pb-3">
               <div>
-                <h2 className="text-base font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                  <ShieldAlert className="w-4 h-4 text-accent-rose" />
-                  Chapter 6 — Audit Findings & Demonstration Cases
+                <h2 className="text-lg font-headline font-black text-rt-ink uppercase tracking-wider flex items-center gap-2">
+                  <Activity className="w-5 h-5 text-rt-ink" />
+                  Chapter 06 — Citizen & Officer Follow-up Dialogue
                 </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Screening flags and shared citizen-officer follow-up cases linked to this asset.
+                <p className="text-xs font-mono text-rt-secondary-text mt-0.5">
+                  Two-way accountability cases logged by citizens and answered by ward executive engineers.
                 </p>
               </div>
               {onNavigateCreateCase && (
                 <button
                   onClick={() => onNavigateCreateCase(road.road_id)}
-                  className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-accent-teal/20 text-accent-teal border border-accent-teal/30 hover:bg-accent-teal/30 transition-colors"
+                  className="px-3 py-1.5 text-xs font-headline font-bold rounded-[4px] bg-rt-mint text-rt-ink border-2 border-rt-ink shadow-brutal-sm hover:shadow-brutal transition-all"
                 >
-                  + Log Citizen Observation
+                  + Create New Case
                 </button>
               )}
             </div>
 
-            {/* Audit Findings */}
-            <div>
-              <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2.5">
-                Automated Audit Findings ({auditFindings.length})
-              </h4>
-              {auditFindings.length === 0 ? (
-                <div className="p-4 bg-navy-950 border border-slate-800 rounded-xl text-xs text-slate-400">
-                  No automated audit deviation flags generated for this road segment.
-                </div>
-              ) : (
-                <div className="space-y-2.5">
-                  {auditFindings.map(f => (
-                    <div key={f.finding_id} className="p-3.5 bg-navy-950 border border-slate-800 rounded-xl text-xs space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <span className="font-mono font-bold text-accent-rose">{f.finding_id}</span>
-                        <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-rose-500/15 text-rose-300 border border-rose-500/30">
-                          {f.status}
-                        </span>
-                      </div>
-                      <p className="text-slate-200">{f.reason}</p>
-                      <div className="text-[11px] text-slate-400">
-                        <strong>Recommended Action:</strong> {f.recommended_action}
-                      </div>
+            {cases.length === 0 ? (
+              <div className="p-8 text-center text-rt-secondary-text text-xs bg-rt-canvas border-2 border-rt-ink rounded-[4px] font-mono">
+                No active follow-up cases on this road. Use "+ Create New Case" to log a field observation.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {cases.map(cs => (
+                  <div key={cs.case_id} className="p-4 bg-rt-canvas border-2 border-rt-ink rounded-[4px] shadow-brutal-sm text-xs space-y-2 font-mono">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold bg-white px-2 py-0.5 rounded border border-rt-ink text-rt-ink">
+                        {cs.case_id}
+                      </span>
+                      <span className="font-bold uppercase text-[10px] bg-rt-primary px-2 py-0.5 rounded border border-rt-ink text-rt-ink">
+                        {cs.status}
+                      </span>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Citizen-Officer Shared Cases */}
-            <div>
-              <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2.5">
-                Shared Citizen & Officer Cases ({cases.length})
-              </h4>
-              {cases.length === 0 ? (
-                <div className="p-4 bg-navy-950 border border-slate-800 rounded-xl text-xs text-slate-400">
-                  No citizen follow-up cases active on this road.
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {cases.map(cs => (
-                    <div key={cs.case_id} className="p-4 bg-navy-950 border border-slate-800 rounded-xl text-xs space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="font-mono font-bold text-accent-teal">{cs.case_id}</span>
-                        <span className="px-2 py-0.5 rounded font-semibold bg-navy-850 text-slate-300 border border-slate-700">
-                          {cs.status}
-                        </span>
-                      </div>
-                      <div className="p-2.5 rounded bg-navy-900 border border-slate-800">
-                        <span className="text-[11px] text-slate-400 block font-semibold">Citizen Observation:</span>
-                        <p className="text-slate-200 mt-0.5">{cs.citizen_observation}</p>
-                      </div>
-                      {cs.officer_response && (
-                        <div className="p-2.5 rounded bg-accent-emerald/10 border border-accent-emerald/30 text-emerald-200">
-                          <span className="text-[11px] text-accent-emerald block font-semibold">
-                            Official Clarification ({cs.officer_name}):
-                          </span>
-                          <p className="mt-0.5">{cs.officer_response}</p>
-                        </div>
-                      )}
+                    <div className="bg-white p-2.5 rounded border border-rt-ink font-body text-rt-ink">
+                      <strong>Citizen Observation:</strong> "{cs.citizen_observation}"
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                    {cs.officer_response && (
+                      <div className="bg-rt-muted p-2.5 rounded border border-rt-ink font-body text-rt-ink">
+                        <strong>Official Officer Clarification:</strong> "{cs.officer_response}"
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
-
       </div>
 
-      {/* Visual Chronological Timeline (Unified across all chapters) */}
-      <div className="p-6 bg-navy-900 border border-slate-800 rounded-2xl">
-        <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-accent-teal" />
-          Road Asset Chronological Event Log ({timelineItems.length})
-        </h3>
+      {/* Unified Chronological Timeline Section */}
+      <div className="p-6 bg-white border-3 border-rt-ink rounded-[6px] shadow-brutal space-y-6">
+        <div className="border-b-2 border-rt-ink pb-3 flex items-center justify-between">
+          <div>
+            <h3 className="text-base font-headline font-black text-rt-ink uppercase tracking-wider">
+              Chronological Asset Timeline ({timelineItems.length} Records)
+            </h3>
+            <p className="text-xs font-mono text-rt-secondary-text mt-0.5">
+              Verified sequence of complaints, contracted repairs, audit screenings, and engineer follow-ups.
+            </p>
+          </div>
+        </div>
 
-        <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-800">
-          {timelineItems.slice(0, 15).map((item, idx) => (
+        <div className="relative pl-6 space-y-6 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-[3px] before:bg-rt-ink">
+          {timelineItems.map((item, idx) => (
             <div key={idx} className="relative group">
-              {/* Dot */}
-              <div className={`absolute -left-[19px] top-1 w-3 h-3 rounded-full border-2 ${
-                item.type === 'work_order' ? 'bg-accent-emerald border-navy-900' :
-                item.type === 'complaint' ? 'bg-accent-teal border-navy-900' :
-                item.type === 'case' ? 'bg-accent-amber border-navy-900' :
-                'bg-accent-rose border-navy-900'
-              }`} />
+              {/* Dot on line */}
+              <div className="absolute -left-[27px] top-1.5 w-4 h-4 rounded-full bg-rt-primary border-2 border-rt-ink" />
 
-              <div className="p-3 bg-navy-950 border border-slate-800 rounded-xl text-xs space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-[11px] text-slate-400">{item.date}</span>
-                  {item.statusBadge && (
-                    <span className="px-1.5 py-0.2 rounded text-[10px] bg-navy-850 text-slate-300 border border-slate-700">
-                      {item.statusBadge}
-                    </span>
-                  )}
+              <div className="p-4 bg-rt-canvas border-2 border-rt-ink rounded-[4px] shadow-brutal-sm space-y-1">
+                <div className="flex items-center justify-between font-mono text-xs">
+                  <span className="text-[11px] font-bold text-rt-secondary-text">{item.date}</span>
+                  <span className="text-[10px] font-bold uppercase bg-white px-1.5 py-0.2 rounded border border-rt-ink text-rt-ink">
+                    {item.recordId}
+                  </span>
                 </div>
-                <h4 className="font-bold text-slate-200">{item.title}</h4>
-                <p className="text-slate-400 text-[11px]">{item.subtitle}</p>
+                <h4 className="text-sm font-headline font-bold text-rt-ink">{item.title}</h4>
+                <p className="text-xs font-body text-rt-secondary-text">{item.subtitle}</p>
+
+                {item.type === 'work_order' && (
+                  <button
+                    onClick={() => onSelectWorkOrder(item.recordId)}
+                    className="mt-2 text-xs font-headline font-bold text-rt-ink hover:underline flex items-center space-x-1"
+                  >
+                    <span>Inspect Work Order Evidence</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </button>
+                )}
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* QR Code Modal Component */}
+      {/* QR Code Modal */}
       <QRCodeModal
         roadId={road.road_id}
         roadName={road.road_name}
         isOpen={showQRModal}
         onClose={() => setShowQRModal(false)}
       />
-
     </div>
   );
 };

@@ -14,26 +14,22 @@ interface CitizenOfficerCasesViewProps {
   onOpenWorkOrder: (woId: string) => void;
 }
 
-const STATUS_STYLES: Record<string, { bg: string; border: string; text: string }> = {
+const STATUS_STYLES: Record<string, { bg: string; text: string }> = {
   'Under Review': {
-    bg: 'bg-amber-950/40',
-    border: 'border-amber-700/60',
-    text: 'text-amber-300'
+    bg: 'bg-rt-primary',
+    text: 'text-rt-ink'
   },
   Clarified: {
-    bg: 'bg-blue-950/40',
-    border: 'border-blue-700/60',
-    text: 'text-blue-300'
+    bg: 'bg-rt-mint',
+    text: 'text-rt-ink'
   },
   'Action Taken': {
-    bg: 'bg-indigo-950/40',
-    border: 'border-indigo-700/60',
-    text: 'text-indigo-300'
+    bg: 'bg-white',
+    text: 'text-rt-ink'
   },
   Resolved: {
-    bg: 'bg-emerald-950/40',
-    border: 'border-emerald-700/60',
-    text: 'text-emerald-300'
+    bg: 'bg-rt-ink',
+    text: 'text-white'
   }
 };
 
@@ -140,36 +136,34 @@ export const CitizenOfficerCasesView: React.FC<CitizenOfficerCasesViewProps> = (
   });
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-6 space-y-6">
+    <div className="p-6 max-w-7xl mx-auto space-y-6 font-body pb-20">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+      <div className="p-6 bg-white border-3 border-rt-ink rounded-[6px] shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center space-x-2">
-            <div className="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg border border-indigo-500/20">
-              <MessageSquare className="w-5 h-5" />
-            </div>
-            <h1 className="text-xl font-bold text-white tracking-tight">
-              Citizen & Officer Case Management
-            </h1>
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <span className="px-2.5 py-0.5 rounded-[3px] text-xs font-mono font-bold bg-rt-primary text-rt-ink border border-rt-ink shadow-[1.5px_1.5px_0px_#171717]">
+              SHARED CIVIC WORKFLOW
+            </span>
             <span
-              className={`px-2 py-0.5 rounded text-[11px] font-semibold border ${
-                role === 'officer'
-                  ? 'bg-blue-950 text-blue-300 border-blue-800'
-                  : 'bg-emerald-950 text-emerald-300 border-emerald-800'
+              className={`px-2 py-0.5 rounded-[3px] text-xs font-mono font-bold border border-rt-ink ${
+                role === 'officer' ? 'bg-rt-mint text-rt-ink' : 'bg-rt-canvas text-rt-ink'
               }`}
             >
-              Active Persona: {role.toUpperCase()}
+              ACTIVE ROLE: {role.toUpperCase()}
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Two-way civic accountability dialogue: citizens report field observations and reopened road failures; municipal engineers provide official responses and remedial work orders.
+          <h1 className="text-3xl font-headline font-black text-rt-ink tracking-tight">
+            Citizen & Officer Case Follow-up Dialogue
+          </h1>
+          <p className="text-xs font-mono text-rt-secondary-text mt-1 max-w-2xl">
+            Two-way accountability: citizens log ground observations on road failures; ward executive engineers record official responses and warranty actions.
           </p>
         </div>
 
-        {/* Persona hint */}
-        <div className="bg-slate-900 border border-slate-800 rounded-lg p-2.5 max-w-sm text-[11px] text-slate-400">
-          <div className="text-slate-300 font-semibold mb-0.5">
-            {role === 'citizen' ? '👤 Citizen Mode Active' : '🏛️ Municipal Officer Mode Active'}
+        {/* Persona docket */}
+        <div className="bg-rt-canvas border-2 border-rt-ink rounded-[4px] p-3 max-w-sm text-xs font-mono shadow-brutal-sm">
+          <div className="font-headline font-bold text-rt-ink mb-1 uppercase text-[11px]">
+            {role === 'citizen' ? '👤 Citizen Mode Active' : '🏛️ Ward Officer Mode Active'}
           </div>
           {role === 'citizen'
             ? 'Submit ground-level road defect observations or question recurring work orders.'
@@ -178,30 +172,30 @@ export const CitizenOfficerCasesView: React.FC<CitizenOfficerCasesViewProps> = (
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Submission Form (Role-based) */}
+        {/* Left Column: Form / Console */}
         <div className="lg:col-span-1 space-y-4">
           {role === 'citizen' ? (
             /* Citizen Observation Form */
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
-              <div className="flex items-center space-x-2 border-b border-slate-800 pb-3">
-                <PlusCircle className="w-4 h-4 text-emerald-400" />
-                <h2 className="text-sm font-semibold text-white">Log Field Observation</h2>
+            <div className="bg-white border-3 border-rt-ink rounded-[6px] p-5 space-y-4 shadow-brutal">
+              <div className="flex items-center space-x-2 border-b-2 border-rt-ink pb-3">
+                <PlusCircle className="w-5 h-5 text-rt-ink" />
+                <h2 className="text-sm font-headline font-black text-rt-ink uppercase">Log Field Observation</h2>
               </div>
 
               {submitSuccess && (
-                <div className="p-3 bg-emerald-950/60 border border-emerald-800 rounded-lg text-xs text-emerald-300 flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 shrink-0" />
-                  <span>Observation recorded. Linked to road passport timeline.</span>
+                <div className="p-3 bg-rt-mint border-2 border-rt-ink rounded-[4px] text-xs font-mono font-bold text-rt-ink flex items-center space-x-2 shadow-brutal-sm">
+                  <CheckCircle2 className="w-4 h-4 shrink-0 text-rt-ink" />
+                  <span>Observation recorded and linked to road passport timeline!</span>
                 </div>
               )}
 
-              <form onSubmit={handleCreateCase} className="space-y-3.5 text-xs">
+              <form onSubmit={handleCreateCase} className="space-y-3.5 text-xs font-mono">
                 <div>
-                  <label className="block text-slate-400 font-medium mb-1">Target Road Asset:</label>
+                  <label className="block text-rt-secondary-text font-bold mb-1">Target Road Asset:</label>
                   <select
                     value={newRoadId}
                     onChange={e => setNewRoadId(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-slate-100 font-mono focus:outline-none focus:border-teal-500"
+                    className="w-full bg-rt-canvas border-2 border-rt-ink rounded-[4px] px-3 py-2 text-rt-ink font-bold focus:outline-none focus:bg-white"
                   >
                     {roads.map(r => (
                       <option key={r.road_id} value={r.road_id}>
@@ -212,20 +206,20 @@ export const CitizenOfficerCasesView: React.FC<CitizenOfficerCasesViewProps> = (
                 </div>
 
                 <div>
-                  <label className="block text-slate-400 font-medium mb-1">
+                  <label className="block text-rt-secondary-text font-bold mb-1">
                     Work Order ID (Optional):
                   </label>
                   <input
                     type="text"
                     value={newWorkOrderId}
                     onChange={e => setNewWorkOrderId(e.target.value)}
-                    placeholder="e.g. WO_0001 (if questioning specific repair)"
-                    className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-slate-100 font-mono focus:outline-none focus:border-teal-500"
+                    placeholder="e.g. WO25-00600"
+                    className="w-full bg-rt-canvas border-2 border-rt-ink rounded-[4px] px-3 py-2 text-rt-ink font-bold focus:outline-none focus:bg-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-400 font-medium mb-1">
+                  <label className="block text-rt-secondary-text font-bold mb-1 font-body">
                     Field Observation & Evidence Notes:
                   </label>
                   <textarea
@@ -233,74 +227,74 @@ export const CitizenOfficerCasesView: React.FC<CitizenOfficerCasesViewProps> = (
                     value={newObservation}
                     onChange={e => setNewObservation(e.target.value)}
                     placeholder="Describe observable surface failure, waterlogging depth, reopened crater, or contractor absence..."
-                    className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-slate-100 focus:outline-none focus:border-teal-500 leading-relaxed"
+                    className="w-full bg-rt-canvas border-2 border-rt-ink rounded-[4px] px-3 py-2 text-rt-ink font-body focus:outline-none focus:bg-white leading-relaxed"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-400 font-medium mb-1">
+                  <label className="block text-rt-secondary-text font-bold mb-1">
                     Photo / Geotag Reference:
                   </label>
                   <input
                     type="text"
                     value={newEvidenceRef}
                     onChange={e => setNewEvidenceRef(e.target.value)}
-                    placeholder="e.g. IMG_MONSOON_42.jpg or Metro Pillar 140"
-                    className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-slate-100 font-mono focus:outline-none focus:border-teal-500"
+                    placeholder="e.g. Metro Pillar 140 / IMG_042.jpg"
+                    className="w-full bg-rt-canvas border-2 border-rt-ink rounded-[4px] px-3 py-2 text-rt-ink font-bold focus:outline-none focus:bg-white"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={submittingCase}
-                  className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-lg transition flex items-center justify-center space-x-2"
+                  className="w-full py-2.5 bg-rt-primary hover:bg-yellow-300 text-rt-ink font-headline font-black border-2 border-rt-ink rounded-[4px] shadow-brutal-sm active:translate-x-[1px] active:translate-y-[1px] transition flex items-center justify-center space-x-2"
                 >
-                  <Send className="w-3.5 h-3.5" />
+                  <Send className="w-4 h-4 text-rt-ink" />
                   <span>{submittingCase ? 'Submitting...' : 'Submit Citizen Observation'}</span>
                 </button>
               </form>
             </div>
           ) : (
             /* Officer Guidance Card */
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
-              <div className="flex items-center space-x-2 border-b border-slate-800 pb-3">
-                <Shield className="w-4 h-4 text-blue-400" />
-                <h2 className="text-sm font-semibold text-white">Officer Operations Console</h2>
+            <div className="bg-white border-3 border-rt-ink rounded-[6px] p-5 space-y-4 shadow-brutal">
+              <div className="flex items-center space-x-2 border-b-2 border-rt-ink pb-3">
+                <Shield className="w-5 h-5 text-rt-ink" />
+                <h2 className="text-sm font-headline font-black text-rt-ink uppercase">Officer Operations Console</h2>
               </div>
 
-              <div className="text-xs text-slate-300 space-y-2 leading-relaxed">
+              <div className="text-xs text-rt-ink space-y-2 leading-relaxed font-body">
                 <p>
-                  As a Municipal Executive Engineer or Road Inspector, you can review flagged citizen cases on the right.
+                  As a Municipal Executive Engineer or Road Inspector, review citizen observations flagged on the right.
                 </p>
-                <p className="text-slate-400">
-                  Click <strong className="text-blue-300">"Submit Official Response"</strong> on any open case to attach technical explanations, cite contractor defect liability clauses, or issue notice for remedial work orders.
+                <p className="text-rt-secondary-text">
+                  Click <strong className="text-rt-ink font-bold">"Respond as Municipal Officer"</strong> to attach technical explanations, invoke contractor defect liability clauses, or issue notice for remedial work orders.
                 </p>
               </div>
 
-              <div className="p-3 bg-slate-950 rounded-lg border border-slate-800 text-xs font-mono space-y-1">
-                <div className="text-slate-400 text-[10px]">CURRENT AUTHENTICATED PROFILE:</div>
-                <div className="text-white font-bold">{officerName}</div>
-                <div className="text-teal-400 text-[11px]">Roads & Traffic Department, BMC</div>
+              <div className="p-3 bg-rt-canvas rounded-[4px] border-2 border-rt-ink text-xs font-mono space-y-1 shadow-brutal-sm">
+                <div className="text-rt-secondary-text text-[10px] uppercase font-bold">CURRENT AUTHENTICATED PROFILE:</div>
+                <div className="text-rt-ink font-bold">{officerName}</div>
+                <div className="text-rt-secondary-text text-[11px]">Roads & Traffic Department, BMC</div>
               </div>
             </div>
           )}
         </div>
 
-        {/* Right Column: Cases Thread & History */}
+        {/* Right Column: Cases Thread */}
         <div className="lg:col-span-2 space-y-4">
           {/* Filter Bar */}
-          <div className="flex items-center justify-between bg-slate-900 border border-slate-800 px-4 py-2.5 rounded-xl text-xs">
-            <span className="text-slate-400 font-semibold uppercase tracking-wider">
+          <div className="flex items-center justify-between bg-white border-3 border-rt-ink px-4 py-2.5 rounded-[6px] text-xs font-mono shadow-brutal-sm">
+            <span className="text-rt-ink font-headline font-black uppercase tracking-wider">
               Follow-up Cases & Timeline ({filteredCases.length})
             </span>
 
             <div className="flex items-center space-x-2">
-              <span className="text-slate-500">Status:</span>
+              <span className="text-rt-secondary-text font-bold uppercase text-[10px]">Status:</span>
               <select
                 value={statusFilter}
                 onChange={e => setStatusFilter(e.target.value)}
-                className="bg-slate-950 border border-slate-700 text-slate-200 rounded px-2.5 py-1 focus:outline-none focus:border-teal-500 font-mono"
+                className="bg-rt-canvas border-2 border-rt-ink text-rt-ink rounded-[3px] px-2.5 py-1 font-bold focus:outline-none"
               >
                 <option value="ALL">All Statuses</option>
                 <option value="Under Review">Under Review</option>
@@ -312,19 +306,19 @@ export const CitizenOfficerCasesView: React.FC<CitizenOfficerCasesViewProps> = (
           </div>
 
           {loading ? (
-            <div className="flex flex-col items-center justify-center p-12 space-y-3">
-              <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-              <p className="text-xs text-slate-400">Loading case threads...</p>
+            <div className="flex flex-col items-center justify-center p-12 space-y-3 font-mono">
+              <div className="w-8 h-8 border-3 border-rt-ink border-t-transparent rounded-full animate-spin" />
+              <p className="text-xs font-bold uppercase tracking-wider text-rt-ink">Loading case threads...</p>
             </div>
           ) : error ? (
-            <div className="p-6 bg-rose-950/30 border border-rose-800 rounded-xl text-center">
-              <p className="text-sm text-rose-300">{error}</p>
+            <div className="p-6 bg-rt-coral text-white border-3 border-rt-ink rounded-[4px] shadow-brutal text-center font-mono">
+              <p className="font-bold">{error}</p>
             </div>
           ) : filteredCases.length === 0 ? (
-            <div className="p-12 text-center bg-slate-900 border border-slate-800 rounded-xl">
-              <CheckCircle2 className="w-8 h-8 text-teal-400 mx-auto mb-2" />
-              <p className="text-sm font-semibold text-white">No Cases Found</p>
-              <p className="text-xs text-slate-400 mt-1">Submit a new observation on the left.</p>
+            <div className="p-12 text-center bg-white border-3 border-rt-ink rounded-[6px] shadow-brutal">
+              <CheckCircle2 className="w-8 h-8 text-rt-ink mx-auto mb-2" />
+              <p className="text-base font-headline font-bold text-rt-ink">No Cases Found</p>
+              <p className="text-xs font-mono text-rt-secondary-text mt-1">Submit a new observation on the left.</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -335,69 +329,71 @@ export const CitizenOfficerCasesView: React.FC<CitizenOfficerCasesViewProps> = (
                 return (
                   <div
                     key={c.case_id}
-                    className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4 shadow-sm"
+                    className="bg-white border-3 border-rt-ink rounded-[6px] p-5 space-y-4 shadow-brutal font-body"
                   >
                     {/* Header: Case ID, Road, Work Order, Status */}
-                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/80 pb-3">
-                      <div className="flex items-center space-x-2.5">
-                        <span className="font-mono text-xs font-bold text-white bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-rt-ink pb-3 font-mono">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xs font-bold text-white bg-rt-ink px-2 py-0.5 rounded-[3px]">
                           {c.case_id}
                         </span>
-                        <span className={`px-2 py-0.5 rounded text-[11px] font-semibold border ${statusStyle.bg} ${statusStyle.border} ${statusStyle.text}`}>
+                        <span className={`px-2 py-0.5 rounded-[3px] text-[11px] font-bold border border-rt-ink ${statusStyle.bg} ${statusStyle.text}`}>
                           {c.status}
                         </span>
-                        <span className="text-xs text-slate-500 font-mono">{c.created_at}</span>
+                        <span className="text-xs text-rt-secondary-text">{c.created_at}</span>
                       </div>
 
-                      <div className="flex items-center space-x-3 text-xs font-mono">
+                      <div className="flex items-center space-x-3 text-xs font-bold">
                         <button
                           onClick={() => onOpenPassport(c.road_id)}
-                          className="text-teal-400 hover:text-teal-300 font-bold flex items-center space-x-1"
+                          className="text-rt-ink hover:underline flex items-center space-x-1"
                         >
                           <span>{c.road_id}</span>
-                          <ExternalLink className="w-3 h-3" />
+                          <ExternalLink className="w-3 h-3 text-rt-ink" />
                         </button>
 
                         {c.work_order_id && (
                           <button
                             onClick={() => onOpenWorkOrder(c.work_order_id!)}
-                            className="text-amber-400 hover:text-amber-300 font-bold flex items-center space-x-1"
+                            className="text-rt-ink hover:underline flex items-center space-x-1"
                           >
                             <span>{c.work_order_id}</span>
-                            <FileText className="w-3 h-3" />
+                            <FileText className="w-3 h-3 text-rt-ink" />
                           </button>
                         )}
                       </div>
                     </div>
 
                     {/* Citizen Observation Content */}
-                    <div className="p-3.5 bg-slate-950 rounded-lg border border-slate-800/80 space-y-2">
-                      <div className="flex items-center space-x-2 text-[11px] text-slate-400">
-                        <User className="w-3.5 h-3.5 text-emerald-400" />
-                        <span className="font-semibold text-slate-300">Citizen Observation</span>
+                    <div className="p-3.5 bg-rt-canvas rounded-[4px] border-2 border-rt-ink space-y-2 shadow-brutal-sm">
+                      <div className="flex items-center space-x-2 text-[11px] font-mono text-rt-secondary-text font-bold">
+                        <User className="w-3.5 h-3.5 text-rt-ink" />
+                        <span className="uppercase text-rt-ink">Citizen Observation</span>
                       </div>
-                      <p className="text-xs text-slate-200 leading-relaxed font-sans">
+                      <p className="text-xs text-rt-ink leading-relaxed font-body font-medium">
                         "{c.citizen_observation}"
                       </p>
 
                       {c.evidence_references && c.evidence_references.length > 0 && (
-                        <div className="text-[11px] font-mono text-slate-400 pt-1">
-                          Attached Evidence: <span className="text-teal-300">{c.evidence_references.join(', ')}</span>
+                        <div className="text-[11px] font-mono text-rt-secondary-text pt-1">
+                          Attached Evidence: <strong className="text-rt-ink">{c.evidence_references.join(', ')}</strong>
                         </div>
                       )}
                     </div>
 
-                    {/* Official Response (if present) */}
+                    {/* Official Response */}
                     {c.officer_response && (
-                      <div className="p-3.5 bg-blue-950/20 rounded-lg border border-blue-900/40 space-y-2">
-                        <div className="flex items-center justify-between text-[11px]">
-                          <div className="flex items-center space-x-2 text-blue-300">
-                            <ShieldCheck className="w-3.5 h-3.5" />
-                            <span className="font-semibold">{c.officer_name || 'Municipal Engineer'}</span>
+                      <div className="p-3.5 bg-rt-mint rounded-[4px] border-2 border-rt-ink space-y-2 shadow-brutal-sm">
+                        <div className="flex items-center justify-between text-[11px] font-mono">
+                          <div className="flex items-center space-x-2 text-rt-ink font-bold">
+                            <ShieldCheck className="w-4 h-4 text-rt-ink" />
+                            <span>{c.officer_name || 'Municipal Engineer'}</span>
                           </div>
-                          <span className="text-blue-400/70 font-mono text-[10px]">Official Response</span>
+                          <span className="bg-white px-1.5 py-0.2 rounded border border-rt-ink font-bold uppercase text-[9px] text-rt-ink">
+                            Official Response
+                          </span>
                         </div>
-                        <p className="text-xs text-slate-200 leading-relaxed font-sans">
+                        <p className="text-xs text-rt-ink leading-relaxed font-body font-medium">
                           {c.officer_response}
                         </p>
                       </div>
@@ -405,64 +401,64 @@ export const CitizenOfficerCasesView: React.FC<CitizenOfficerCasesViewProps> = (
 
                     {/* Timeline Log */}
                     {c.follow_up_history && c.follow_up_history.length > 0 && (
-                      <div className="pt-2 border-t border-slate-800/80 space-y-1.5">
-                        <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                      <div className="pt-2 border-t border-rt-ink/20 space-y-1.5 font-mono">
+                        <div className="text-[10px] font-headline font-bold uppercase tracking-wider text-rt-secondary-text">
                           Timeline History:
                         </div>
-                        <div className="space-y-1 text-[11px] font-mono text-slate-400">
+                        <div className="space-y-1 text-[11px] text-rt-secondary-text">
                           {c.follow_up_history.map((h, i) => (
                             <div key={i} className="flex items-center space-x-2">
-                              <span className="text-slate-600">{h.date}</span>
-                              <span className="text-slate-500">[{h.actor}]</span>
-                              <span className="text-slate-300 font-sans">{h.action}</span>
+                              <span className="font-bold text-rt-ink">{h.date}</span>
+                              <span className="text-rt-secondary-text">[{h.actor}]</span>
+                              <span className="text-rt-ink font-body font-medium">{h.action}</span>
                             </div>
                           ))}
                         </div>
                       </div>
                     )}
 
-                    {/* Officer Response Action Panel (when officer role active) */}
+                    {/* Officer Response Action Panel */}
                     {role === 'officer' && (
                       <div className="pt-2">
                         {isResponding ? (
-                          <div className="p-4 bg-slate-950 border border-blue-800 rounded-lg space-y-3 text-xs">
-                            <div className="font-semibold text-blue-300 flex items-center justify-between">
-                              <span>Draft Official Engineering Response</span>
+                          <div className="p-4 bg-rt-canvas border-2 border-rt-ink rounded-[4px] space-y-3 text-xs font-mono shadow-brutal-sm">
+                            <div className="font-headline font-bold text-rt-ink flex items-center justify-between">
+                              <span className="uppercase">Draft Official Engineering Response</span>
                               <button
                                 onClick={() => setRespondingCaseId(null)}
-                                className="text-slate-400 hover:text-white"
+                                className="text-rt-secondary-text hover:text-rt-ink font-bold"
                               >
-                                Cancel
+                                [Cancel]
                               </button>
                             </div>
 
                             <div>
-                              <label className="block text-slate-400 mb-1">Responding Officer Name & Title:</label>
+                              <label className="block text-rt-secondary-text mb-1 font-bold">Responding Officer Name & Title:</label>
                               <input
                                 type="text"
                                 value={officerName}
                                 onChange={e => setOfficerName(e.target.value)}
-                                className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-slate-100"
+                                className="w-full bg-white border-2 border-rt-ink rounded-[4px] px-3 py-1.5 text-rt-ink font-bold"
                               />
                             </div>
 
                             <div>
-                              <label className="block text-slate-400 mb-1">Technical Clarification / Action Taken:</label>
+                              <label className="block text-rt-secondary-text mb-1 font-bold">Technical Clarification / Action Taken:</label>
                               <textarea
                                 rows={3}
                                 value={officerResponse}
                                 onChange={e => setOfficerResponse(e.target.value)}
                                 placeholder="Explain site inspection outcome, defect liability notice to contractor, or remedial work order sanction..."
-                                className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-slate-100"
+                                className="w-full bg-white border-2 border-rt-ink rounded-[4px] px-3 py-1.5 text-rt-ink font-body"
                               />
                             </div>
 
                             <div className="flex items-center space-x-3">
-                              <label className="text-slate-400">Update Status:</label>
+                              <label className="text-rt-secondary-text font-bold">Update Status:</label>
                               <select
                                 value={officerNewStatus}
                                 onChange={e => setOfficerNewStatus(e.target.value)}
-                                className="bg-slate-900 border border-slate-700 text-slate-200 rounded px-2.5 py-1"
+                                className="bg-white border-2 border-rt-ink text-rt-ink rounded-[3px] px-2.5 py-1 font-bold"
                               >
                                 <option value="Clarified">Clarified</option>
                                 <option value="Action Taken">Action Taken</option>
@@ -474,7 +470,7 @@ export const CitizenOfficerCasesView: React.FC<CitizenOfficerCasesViewProps> = (
                             <button
                               onClick={() => handleRespondCase(c.case_id)}
                               disabled={submittingResponse}
-                              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded transition"
+                              className="px-4 py-2 bg-rt-primary hover:bg-yellow-300 text-rt-ink font-headline font-bold border-2 border-rt-ink rounded-[4px] shadow-brutal-sm active:translate-x-[1px] active:translate-y-[1px] transition"
                             >
                               {submittingResponse ? 'Publishing...' : 'Publish Official Municipal Response'}
                             </button>
@@ -485,9 +481,9 @@ export const CitizenOfficerCasesView: React.FC<CitizenOfficerCasesViewProps> = (
                               setRespondingCaseId(c.case_id);
                               setOfficerResponse('');
                             }}
-                            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs font-medium border border-slate-700 transition flex items-center space-x-1.5"
+                            className="px-3.5 py-1.5 bg-white hover:bg-rt-canvas text-rt-ink rounded-[4px] text-xs font-headline font-bold border-2 border-rt-ink shadow-brutal-sm active:translate-x-[1px] active:translate-y-[1px] transition flex items-center space-x-1.5"
                           >
-                            <CornerDownRight className="w-3.5 h-3.5 text-blue-400" />
+                            <CornerDownRight className="w-3.5 h-3.5 text-rt-ink" />
                             <span>Respond as Municipal Officer</span>
                           </button>
                         )}

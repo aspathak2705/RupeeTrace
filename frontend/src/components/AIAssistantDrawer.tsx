@@ -93,42 +93,44 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-y-0 right-0 w-full sm:w-[480px] bg-slate-900 border-l border-slate-800 shadow-2xl z-50 flex flex-col font-sans">
-      {/* Header */}
-      <div className="p-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+    <div className="fixed inset-y-0 right-0 w-full sm:w-[500px] bg-rt-canvas border-l-3 border-rt-ink shadow-brutal-xl z-50 flex flex-col font-body">
+      {/* Drawer Header */}
+      <div className="p-4 bg-rt-primary border-b-3 border-rt-ink flex items-center justify-between">
         <div className="flex items-center space-x-2.5">
-          <div className="p-2 bg-teal-500/10 text-teal-400 rounded-lg border border-teal-500/20">
-            <Bot className="w-5 h-5" />
+          <div className="w-8 h-8 bg-white border-2 border-rt-ink rounded-[4px] shadow-brutal-sm flex items-center justify-center font-bold text-rt-ink">
+            ₹
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h2 className="text-sm font-bold text-white">RupeeTrace AI Assistant</h2>
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-teal-950 text-teal-300 border border-teal-800">
-                Grounded
+              <h2 className="text-sm font-headline font-black text-rt-ink tracking-tight uppercase">
+                RUPEETRACE AI ASSISTANT
+              </h2>
+              <span className="px-1.5 py-0.5 rounded-[3px] text-[10px] font-mono font-bold bg-white text-rt-ink border border-rt-ink">
+                GROUNDED
               </span>
             </div>
-            <p className="text-[11px] text-slate-400">English · हिन्दी · मराठी · Hinglish</p>
+            <p className="text-[11px] font-mono text-rt-secondary-text">English · हिन्दी · मराठी · Hinglish</p>
           </div>
         </div>
 
         <button
           onClick={onClose}
-          className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition"
+          className="p-1 bg-white border-2 border-rt-ink rounded text-rt-ink hover:bg-rt-canvas transition shadow-brutal-sm"
         >
           <X className="w-4 h-4" />
         </button>
       </div>
 
-      {/* Quick Prompt Pills */}
-      <div className="p-3 bg-slate-950/60 border-b border-slate-800/80 flex items-center space-x-2 overflow-x-auto text-xs no-scrollbar">
-        <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider shrink-0">
+      {/* Suggested Questions Pills */}
+      <div className="p-3 bg-white border-b-2 border-rt-ink flex items-center space-x-2 overflow-x-auto text-xs no-scrollbar">
+        <span className="text-[10px] font-headline font-black text-rt-secondary-text uppercase tracking-wider shrink-0">
           Try:
         </span>
         {SAMPLE_QUESTIONS.map((sq, i) => (
           <button
             key={i}
             onClick={() => handleSend(sq.query)}
-            className="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white rounded-full border border-slate-800 text-[11px] whitespace-nowrap transition"
+            className="px-2.5 py-1 bg-rt-canvas hover:bg-yellow-100 text-rt-ink rounded-[3px] border border-rt-ink font-mono text-[11px] whitespace-nowrap transition shadow-[1px_1px_0px_#171717]"
           >
             {sq.label}
           </button>
@@ -143,32 +145,32 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({
           return (
             <div
               key={m.id}
-              className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} space-y-1.5`}
+              className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} space-y-1`}
             >
               <div
-                className={`max-w-[90%] rounded-2xl p-4 text-xs leading-relaxed ${
+                className={`max-w-[90%] p-4 text-xs leading-relaxed rounded-[4px] border-2 border-rt-ink shadow-brutal-sm ${
                   isUser
-                    ? 'bg-teal-600 text-white rounded-br-none shadow-md font-medium'
-                    : 'bg-slate-950 border border-slate-800 text-slate-200 rounded-bl-none shadow-sm space-y-3'
+                    ? 'bg-rt-ink text-white font-medium'
+                    : 'bg-white text-rt-ink space-y-3'
                 }`}
               >
                 {/* Assistant Language Pill */}
                 {!isUser && m.language && (
-                  <div className="flex items-center justify-between border-b border-slate-800 pb-1.5 text-[10px]">
-                    <span className="text-teal-400 font-mono flex items-center space-x-1">
-                      <Globe2 className="w-3 h-3" />
-                      <span>{m.language} Output</span>
+                  <div className="flex items-center justify-between border-b border-rt-ink/20 pb-1.5 text-[10px] font-mono">
+                    <span className="text-rt-ink font-bold flex items-center space-x-1">
+                      <Globe2 className="w-3 h-3 text-rt-ink" />
+                      <span>{m.language} Mode</span>
                     </span>
-                    <span className="text-slate-500 font-mono">Retrieved-Grounded</span>
+                    <span className="text-rt-secondary-text font-bold uppercase">Zero Hallucination</span>
                   </div>
                 )}
 
-                <div>{m.text}</div>
+                <div className="font-body text-[13px]">{m.text}</div>
 
                 {/* Cited Source Records */}
                 {m.citedRecords && m.citedRecords.length > 0 && (
-                  <div className="pt-2 border-t border-slate-900 space-y-1">
-                    <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
+                  <div className="pt-2 border-t border-rt-ink/20 space-y-1">
+                    <span className="text-[10px] font-headline font-black text-rt-secondary-text uppercase tracking-wider block">
                       Cited Source Records:
                     </span>
                     <div className="flex flex-wrap gap-1.5">
@@ -179,10 +181,10 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({
                             if (r.id.startsWith('RD')) onNavigateRoad(r.id);
                             if (r.id.startsWith('WO')) onNavigateWorkOrder(r.id);
                           }}
-                          className="px-2 py-0.5 rounded bg-slate-900 hover:bg-slate-800 border border-slate-800 text-teal-300 font-mono text-[10px] flex items-center space-x-1 transition"
+                          className="px-2 py-0.5 rounded-[3px] bg-rt-canvas hover:bg-yellow-100 border border-rt-ink text-rt-ink font-mono text-[10px] font-bold flex items-center space-x-1 transition shadow-[1px_1px_0px_#171717]"
                         >
                           <span>{r.file}#{r.id}</span>
-                          <ArrowRight className="w-2.5 h-2.5 text-slate-500" />
+                          <ArrowRight className="w-2.5 h-2.5 text-rt-ink" />
                         </button>
                       ))}
                     </div>
@@ -191,12 +193,12 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({
 
                 {/* Missing Evidence Warning */}
                 {m.missingEvidence && m.missingEvidence.length > 0 && (
-                  <div className="p-2.5 bg-amber-950/30 border border-amber-900/50 rounded-lg text-[10px] text-amber-300 space-y-1">
-                    <div className="font-semibold flex items-center space-x-1 text-amber-400">
-                      <ShieldAlert className="w-3 h-3" />
+                  <div className="p-2.5 bg-yellow-50 border-2 border-rt-ink rounded-[4px] text-[10px] text-rt-ink space-y-1">
+                    <div className="font-headline font-bold flex items-center space-x-1 text-rt-ink uppercase">
+                      <ShieldAlert className="w-3 h-3 text-rt-coral" />
                       <span>Missing Corroborative Evidence:</span>
                     </div>
-                    <ul className="list-disc pl-4 space-y-0.5 text-amber-300/80">
+                    <ul className="list-disc pl-4 space-y-0.5 text-rt-secondary-text font-mono">
                       {m.missingEvidence.map((me, idx) => (
                         <li key={idx}>{me}</li>
                       ))}
@@ -206,9 +208,11 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({
 
                 {/* Recommended Next Action */}
                 {m.recommendedAction && (
-                  <div className="pt-1 text-[11px] text-teal-400 font-mono">
-                    <strong className="text-slate-400 font-sans mr-1">Recommended Action:</strong>
-                    {m.recommendedAction}
+                  <div className="pt-1 text-[11px] font-mono text-rt-ink">
+                    <strong className="text-rt-secondary-text uppercase font-headline mr-1 block text-[10px]">Recommended Action:</strong>
+                    <span className="bg-rt-canvas px-2 py-1 rounded border border-rt-ink block mt-0.5">
+                      {m.recommendedAction}
+                    </span>
                   </div>
                 )}
               </div>
@@ -217,15 +221,15 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({
         })}
 
         {loading && (
-          <div className="flex items-center space-x-2 text-slate-400 text-xs py-2">
-            <div className="w-4 h-4 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+          <div className="flex items-center space-x-2 text-rt-ink font-mono font-bold text-xs py-2 bg-white p-3 rounded border-2 border-rt-ink shadow-brutal-sm">
+            <div className="w-4 h-4 border-2 border-rt-ink border-t-transparent rounded-full animate-spin" />
             <span>Resolving entities and retrieving verified records...</span>
           </div>
         )}
       </div>
 
       {/* Input Form */}
-      <div className="p-4 bg-slate-950 border-t border-slate-800">
+      <div className="p-4 bg-white border-t-3 border-rt-ink">
         <form
           onSubmit={e => {
             e.preventDefault();
@@ -238,17 +242,17 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({
             value={inputVal}
             onChange={e => setInputVal(e.target.value)}
             placeholder="Ask about a road, work order, or contractor..."
-            className="flex-1 bg-slate-900 border border-slate-700 text-xs text-slate-100 rounded-lg px-3 py-2.5 focus:outline-none focus:border-teal-500"
+            className="flex-1 bg-rt-canvas border-2 border-rt-ink text-xs text-rt-ink rounded-[4px] px-3 py-2.5 font-mono focus:outline-none focus:bg-white focus:shadow-brutal-sm"
           />
           <button
             type="submit"
             disabled={!inputVal.trim() || loading}
-            className="p-2.5 bg-teal-600 hover:bg-teal-500 disabled:opacity-40 text-white rounded-lg transition"
+            className="p-2.5 bg-rt-primary hover:bg-yellow-300 disabled:opacity-40 text-rt-ink border-2 border-rt-ink rounded-[4px] shadow-brutal-sm active:translate-x-[1px] active:translate-y-[1px] transition"
           >
             <Send className="w-4 h-4" />
           </button>
         </form>
-        <div className="text-[10px] text-slate-500 mt-2 text-center">
+        <div className="text-[10px] text-rt-secondary-text font-mono mt-2 text-center">
           Grounding: Deterministic retrieval from synthetic dataset. Zero fabricated figures.
         </div>
       </div>

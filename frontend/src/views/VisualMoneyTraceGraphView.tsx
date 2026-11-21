@@ -16,64 +16,57 @@ interface VisualMoneyTraceGraphViewProps {
   onNavigateToWard: (wardCode: string) => void;
 }
 
-// Category styling metadata
+// Neo-Brutalist Category styling metadata
 const CATEGORY_STYLES: Record<string, { bg: string; border: string; text: string; fill: string; dot: string; label: string }> = {
   financial: {
-    bg: 'bg-indigo-950/80',
-    border: 'border-indigo-500/60',
-    text: 'text-indigo-300',
-    fill: '#6366f1',
-    dot: 'bg-indigo-400',
+    bg: 'bg-rt-primary',
+    border: 'border-rt-ink',
+    text: 'text-rt-ink',
+    fill: '#F4D63D',
+    dot: 'bg-rt-ink',
     label: 'Ward Budget'
   },
   road_asset: {
-    bg: 'bg-teal-950/80',
-    border: 'border-teal-500/60',
-    text: 'text-teal-300',
-    fill: '#14b8a6',
-    dot: 'bg-teal-400',
+    bg: 'bg-rt-mint',
+    border: 'border-rt-ink',
+    text: 'text-rt-ink',
+    fill: '#B9D9D1',
+    dot: 'bg-rt-ink',
     label: 'Road Asset'
   },
   work_order: {
-    bg: 'bg-amber-950/80',
-    border: 'border-amber-500/60',
-    text: 'text-amber-300',
-    fill: '#f59e0b',
-    dot: 'bg-amber-400',
+    bg: 'bg-white',
+    border: 'border-rt-ink',
+    text: 'text-rt-ink',
+    fill: '#FFFFFF',
+    dot: 'bg-rt-primary',
     label: 'Work Order'
   },
   contractor: {
-    bg: 'bg-blue-950/80',
-    border: 'border-blue-500/60',
-    text: 'text-blue-300',
-    fill: '#3b82f6',
-    dot: 'bg-blue-400',
+    bg: 'bg-rt-canvas',
+    border: 'border-rt-ink',
+    text: 'text-rt-ink',
+    fill: '#F5EBDD',
+    dot: 'bg-rt-ink',
     label: 'Contractor'
   },
   citizen: {
-    bg: 'bg-emerald-950/80',
-    border: 'border-emerald-500/60',
-    text: 'text-emerald-300',
-    fill: '#10b981',
-    dot: 'bg-emerald-400',
+    bg: 'bg-rt-muted',
+    border: 'border-rt-ink',
+    text: 'text-rt-ink',
+    fill: '#E5DED2',
+    dot: 'bg-rt-ink',
     label: 'Citizen Complaint'
   },
   outcome_audit: {
-    bg: 'bg-rose-950/80',
-    border: 'border-rose-500/60',
-    text: 'text-rose-300',
-    fill: '#f43f5e',
-    dot: 'bg-rose-400',
+    bg: 'bg-rt-coral',
+    border: 'border-rt-ink',
+    text: 'text-white',
+    fill: '#F06A4D',
+    dot: 'bg-white',
     label: 'Outcome / Audit'
   }
 };
-
-interface SimNode extends GraphNode {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-}
 
 export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps> = ({
   initialFocusType = 'road',
@@ -134,12 +127,11 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
       const data = await api.getGraph(params);
       setGraphData(data);
 
-      // Initialize radial / layered layout around center (400, 300)
+      // Initialize radial / layered layout around center (450, 320)
       const centerX = 450;
       const centerY = 320;
       const posMap = new Map<string, { x: number; y: number }>();
 
-      // Group nodes by category to create a logical radial/hierarchical orbit
       const wardNodes = data.nodes.filter(n => n.category === 'financial');
       const roadNodes = data.nodes.filter(n => n.category === 'road_asset');
       const woNodes = data.nodes.filter(n => n.category === 'work_order');
@@ -147,17 +139,12 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
       const citizenNodes = data.nodes.filter(n => n.category === 'citizen');
       const outcomeNodes = data.nodes.filter(n => n.category === 'outcome_audit');
 
-      // Place root or main hub at center
-      let hubPlaced = false;
       if (type === 'road' && roadNodes.length > 0) {
         posMap.set(roadNodes[0].id, { x: centerX, y: centerY });
-        hubPlaced = true;
       } else if (type === 'work_order' && woNodes.length > 0) {
         posMap.set(woNodes[0].id, { x: centerX, y: centerY });
-        hubPlaced = true;
       } else if (type === 'ward' && wardNodes.length > 0) {
         posMap.set(wardNodes[0].id, { x: centerX, y: centerY });
-        hubPlaced = true;
       }
 
       const placeInCircle = (items: GraphNode[], radius: number, startAngle: number = 0, angleSpan: number = Math.PI * 2) => {
@@ -173,15 +160,13 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
         });
       };
 
-      // Place categories at concentric rings
-      placeInCircle(wardNodes, 120, -Math.PI / 2, Math.PI);
-      placeInCircle(roadNodes, 180, 0, Math.PI * 2);
-      placeInCircle(woNodes, 270, 0.4, Math.PI * 2);
+      placeInCircle(wardNodes, 130, -Math.PI / 2, Math.PI);
+      placeInCircle(roadNodes, 190, 0, Math.PI * 2);
+      placeInCircle(woNodes, 280, 0.4, Math.PI * 2);
       placeInCircle(contractorNodes, 360, Math.PI * 0.7, Math.PI * 0.8);
       placeInCircle(citizenNodes, 380, -Math.PI * 0.6, Math.PI * 0.9);
-      placeInCircle(outcomeNodes, 400, Math.PI * 0.2, Math.PI * 0.6);
+      placeInCircle(outcomeNodes, 410, Math.PI * 0.2, Math.PI * 0.6);
 
-      // Catch-all for any unplaced
       data.nodes.forEach((n, idx) => {
         if (!posMap.has(n.id)) {
           posMap.set(n.id, {
@@ -195,7 +180,6 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
       setPan({ x: 0, y: 0 });
       setZoom(1);
 
-      // Default select the root node or first work order
       const initialSel = data.nodes.find(n => n.id.toLowerCase() === id.toLowerCase()) || data.nodes[0];
       if (initialSel) setSelectedNode(initialSel);
 
@@ -218,7 +202,6 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
     }
   };
 
-  // Filtered nodes and edges
   const visibleNodes = useMemo(() => {
     if (!graphData) return [];
     return graphData.nodes.filter(n => activeCategories[n.category] !== false);
@@ -233,7 +216,6 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
     );
   }, [graphData, visibleNodeIds]);
 
-  // Connected edges for the selected node
   const selectedNodeEdges = useMemo(() => {
     if (!selectedNode || !graphData) return { incoming: [], outgoing: [] };
     const incoming = graphData.edges.filter(e => e.target === selectedNode.id);
@@ -249,7 +231,7 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.button !== 0 || draggedNodeId) return; // Only primary button and not dragging node
+    if (e.button !== 0 || draggedNodeId) return;
     setIsPanning(true);
     setPanStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
   };
@@ -287,22 +269,24 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] bg-slate-950 text-slate-100 overflow-hidden">
-      {/* Top Controls Bar */}
-      <div className="bg-slate-900 border-b border-slate-800 px-6 py-3 flex flex-wrap items-center justify-between gap-4 z-10">
+    <div className="flex flex-col h-[calc(100vh-8.5rem)] bg-rt-canvas text-rt-ink overflow-hidden font-body">
+      {/* Top Neo-Brutalist Controls Bar */}
+      <div className="bg-white border-b-3 border-rt-ink px-6 py-3 flex flex-wrap items-center justify-between gap-4 z-10 shadow-brutal-sm">
         <div className="flex items-center space-x-3">
-          <div className="p-2 bg-teal-500/10 text-teal-400 rounded-lg border border-teal-500/20">
-            <Network className="w-5 h-5" />
+          <div className="w-9 h-9 bg-rt-mint border-2 border-rt-ink rounded-[4px] shadow-brutal-sm flex items-center justify-center font-bold text-rt-ink">
+            <Network className="w-5 h-5 text-rt-ink" />
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h1 className="text-base font-semibold text-white tracking-tight">Visual Money Trace Graph</h1>
-              <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-teal-950 border border-teal-800 text-teal-300">
-                Deterministic Linkage
+              <h1 className="text-base font-headline font-black text-rt-ink tracking-tight uppercase">
+                Visual Money Trace Board
+              </h1>
+              <span className="px-2 py-0.5 rounded-[3px] text-[10px] font-mono font-bold bg-rt-primary border border-rt-ink text-rt-ink shadow-[1px_1px_0px_#171717]">
+                MULTI-HOP TRACE
               </span>
             </div>
-            <p className="text-xs text-slate-400">
-              Interactive civic-finance subgraph: citizen complaints → work orders → contractors → outcome audits.
+            <p className="text-xs font-mono text-rt-secondary-text">
+              Deterministic links: Complaints → Work Orders → Contractors → Outcome Audits.
             </p>
           </div>
         </div>
@@ -318,7 +302,7 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
               if (val === 'work_order') setInputVal('WO25-00600');
               if (val === 'ward') setInputVal('K/E');
             }}
-            className="bg-slate-950 border border-slate-700 text-xs text-slate-200 rounded px-2.5 py-1.5 focus:outline-none focus:border-teal-500"
+            className="bg-rt-canvas border-2 border-rt-ink text-xs text-rt-ink rounded-[4px] px-2.5 py-1.5 font-mono font-bold focus:outline-none focus:bg-white"
           >
             <option value="road">Road ID</option>
             <option value="work_order">Work Order ID</option>
@@ -331,45 +315,45 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
               value={inputVal}
               onChange={e => setInputVal(e.target.value)}
               placeholder="e.g. RD0140, WO25-00600..."
-              className="w-44 bg-slate-950 border border-slate-700 text-xs text-slate-200 rounded pl-7 pr-3 py-1.5 focus:outline-none focus:border-teal-500 font-mono"
+              className="w-44 bg-rt-canvas border-2 border-rt-ink text-xs text-rt-ink rounded-[4px] pl-7 pr-3 py-1.5 font-mono font-bold focus:outline-none focus:bg-white focus:shadow-brutal-sm"
             />
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2 top-2" />
+            <Search className="w-3.5 h-3.5 text-rt-ink absolute left-2 top-2" />
           </div>
 
           <button
             type="submit"
-            className="px-3 py-1.5 bg-teal-600 hover:bg-teal-500 text-white text-xs font-medium rounded transition"
+            className="px-3 py-1.5 bg-rt-primary hover:bg-yellow-300 text-rt-ink text-xs font-headline font-bold border-2 border-rt-ink rounded-[4px] shadow-brutal-sm active:translate-x-[1px] active:translate-y-[1px] transition"
           >
             Trace
           </button>
         </form>
 
         {/* View Mode Toggle */}
-        <div className="flex items-center bg-slate-950 border border-slate-800 rounded p-0.5 text-xs">
+        <div className="flex items-center bg-rt-canvas border-2 border-rt-ink rounded-[4px] p-0.5 text-xs shadow-brutal-sm">
           <button
             onClick={() => setViewMode('canvas')}
-            className={`px-3 py-1 rounded font-medium transition ${
-              viewMode === 'canvas' ? 'bg-teal-600 text-white' : 'text-slate-400 hover:text-white'
+            className={`px-3 py-1 rounded-[3px] font-headline font-bold transition ${
+              viewMode === 'canvas' ? 'bg-rt-ink text-white' : 'text-rt-ink hover:bg-white'
             }`}
           >
-            Graph Canvas
+            Investigation Board
           </button>
           <button
             onClick={() => setViewMode('list')}
-            className={`px-3 py-1 rounded font-medium transition ${
-              viewMode === 'list' ? 'bg-teal-600 text-white' : 'text-slate-400 hover:text-white'
+            className={`px-3 py-1 rounded-[3px] font-headline font-bold transition ${
+              viewMode === 'list' ? 'bg-rt-ink text-white' : 'text-rt-ink hover:bg-white'
             }`}
           >
-            Structured List
+            Catalog Table
           </button>
         </div>
       </div>
 
       {/* Filter Chips Bar */}
-      <div className="bg-slate-900/60 border-b border-slate-800/80 px-6 py-2 flex items-center justify-between text-xs overflow-x-auto">
+      <div className="bg-rt-muted border-b-2 border-rt-ink px-6 py-2 flex items-center justify-between text-xs overflow-x-auto">
         <div className="flex items-center space-x-2">
-          <span className="text-slate-400 text-[11px] font-semibold flex items-center gap-1 uppercase tracking-wider mr-2">
-            <Filter className="w-3 h-3 text-slate-400" /> Filter Layers:
+          <span className="text-rt-ink text-[11px] font-headline font-bold flex items-center gap-1 uppercase tracking-wider mr-2">
+            <Filter className="w-3 h-3 text-rt-ink" /> Layers:
           </span>
           {Object.entries(CATEGORY_STYLES).map(([key, style]) => {
             const isActive = activeCategories[key] !== false;
@@ -377,13 +361,13 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
               <button
                 key={key}
                 onClick={() => toggleCategory(key)}
-                className={`px-2.5 py-1 rounded-full border text-[11px] font-medium flex items-center space-x-1.5 transition ${
+                className={`px-2.5 py-1 rounded-[3px] border-2 border-rt-ink text-[11px] font-mono font-bold flex items-center space-x-1.5 transition-all shadow-[1.5px_1.5px_0px_#171717] ${
                   isActive
-                    ? `${style.bg} ${style.border} ${style.text}`
-                    : 'bg-slate-900/40 border-slate-800 text-slate-500 line-through'
+                    ? `${style.bg} ${style.text}`
+                    : 'bg-rt-canvas text-rt-secondary-text opacity-50 line-through'
                 }`}
               >
-                <span className={`w-2 h-2 rounded-full ${style.dot}`} />
+                <span className={`w-2 h-2 rounded-full border border-rt-ink ${style.dot}`} />
                 <span>{style.label}</span>
               </button>
             );
@@ -391,9 +375,9 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
         </div>
 
         {graphData && (
-          <div className="text-[11px] text-slate-400 font-mono flex items-center space-x-3">
-            <span>Nodes: <strong className="text-slate-200">{visibleNodes.length}</strong></span>
-            <span>Links: <strong className="text-slate-200">{visibleEdges.length}</strong></span>
+          <div className="text-[11px] text-rt-secondary-text font-mono flex items-center space-x-3">
+            <span>Nodes: <strong className="text-rt-ink">{visibleNodes.length}</strong></span>
+            <span>Links: <strong className="text-rt-ink">{visibleEdges.length}</strong></span>
           </div>
         )}
       </div>
@@ -401,40 +385,42 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
       {/* Main Content Area */}
       <div className="flex-1 flex relative overflow-hidden">
         {loading ? (
-          <div className="flex-1 flex flex-col items-center justify-center space-y-3 bg-slate-950">
-            <div className="w-8 h-8 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
-            <p className="text-xs text-slate-400 font-medium tracking-wide">Tracing financial relationship graph...</p>
+          <div className="flex-1 flex flex-col items-center justify-center space-y-3 bg-rt-canvas">
+            <div className="w-8 h-8 border-3 border-rt-ink border-t-transparent rounded-full animate-spin" />
+            <p className="text-xs font-mono font-bold uppercase tracking-wider text-rt-ink">
+              Tracing financial relationship chain...
+            </p>
           </div>
         ) : error ? (
-          <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-            <div className="p-3 bg-rose-500/10 text-rose-400 rounded-xl border border-rose-500/20 mb-3">
+          <div className="flex-1 flex flex-col items-center justify-center p-6 text-center bg-rt-canvas">
+            <div className="p-3 bg-rt-coral text-white rounded-[4px] border-2 border-rt-ink mb-3 shadow-brutal-sm">
               <AlertTriangle className="w-6 h-6" />
             </div>
-            <h3 className="text-sm font-semibold text-white">Graph Assembly Error</h3>
-            <p className="text-xs text-slate-400 max-w-md mt-1 mb-4">{error}</p>
+            <h3 className="text-base font-headline font-bold text-rt-ink">Graph Assembly Error</h3>
+            <p className="text-xs font-mono text-rt-secondary-text max-w-md mt-1 mb-4">{error}</p>
             <button
               onClick={() => loadGraph(focusType, focusId)}
-              className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium rounded border border-slate-700"
+              className="px-4 py-2 bg-rt-primary text-rt-ink text-xs font-headline font-bold rounded-[4px] border-2 border-rt-ink shadow-brutal-sm hover:shadow-brutal"
             >
               Retry
             </button>
           </div>
         ) : viewMode === 'canvas' ? (
           /* Canvas Graph Renderer */
-          <div className="flex-1 relative bg-slate-950 overflow-hidden cursor-grab active:cursor-grabbing select-none">
+          <div className="flex-1 relative bg-rt-canvas overflow-hidden cursor-grab active:cursor-grabbing select-none">
             {/* Canvas Zoom Controls Floating */}
-            <div className="absolute top-4 left-4 z-10 flex flex-col bg-slate-900/90 border border-slate-800 rounded-lg p-1 shadow-xl space-y-1 backdrop-blur-sm">
+            <div className="absolute top-4 left-4 z-10 flex flex-col bg-white border-2 border-rt-ink rounded-[4px] p-1 shadow-brutal space-y-1">
               <button
                 onClick={() => setZoom(z => Math.min(z * 1.2, 3.0))}
                 title="Zoom In"
-                className="p-1.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded"
+                className="p-1.5 hover:bg-rt-canvas text-rt-ink rounded font-bold"
               >
                 <ZoomIn className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setZoom(z => Math.max(z * 0.8, 0.4))}
                 title="Zoom Out"
-                className="p-1.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded"
+                className="p-1.5 hover:bg-rt-canvas text-rt-ink rounded font-bold"
               >
                 <ZoomOut className="w-4 h-4" />
               </button>
@@ -444,18 +430,18 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
                   setPan({ x: 0, y: 0 });
                 }}
                 title="Reset View"
-                className="p-1.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded"
+                className="p-1.5 hover:bg-rt-canvas text-rt-ink rounded font-bold"
               >
                 <RotateCcw className="w-4 h-4" />
               </button>
-              <div className="text-[10px] text-center font-mono text-slate-500 pt-1 border-t border-slate-800">
+              <div className="text-[10px] text-center font-mono font-bold text-rt-secondary-text pt-1 border-t border-rt-ink">
                 {Math.round(zoom * 100)}%
               </div>
             </div>
 
             {/* Canvas Hint */}
-            <div className="absolute bottom-4 left-4 z-10 pointer-events-none text-[11px] text-slate-500 bg-slate-900/80 px-2.5 py-1 rounded border border-slate-800/80">
-              Drag canvas to pan · Scroll to zoom · Click node to inspect evidence · Drag node to reposition
+            <div className="absolute bottom-4 left-4 z-10 pointer-events-none text-[11px] font-mono text-rt-ink bg-white px-3 py-1.5 rounded-[4px] border-2 border-rt-ink shadow-brutal-sm">
+              Drag to pan • Scroll to zoom • Click node to inspect verified evidence dossier
             </div>
 
             <svg
@@ -467,28 +453,27 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
               onWheel={handleWheel}
             >
               <defs>
-                {/* Edge Arrowhead markers */}
                 <marker
                   id="arrow-default"
                   viewBox="0 0 10 10"
-                  refX="18"
+                  refX="20"
                   refY="5"
                   markerWidth="6"
                   markerHeight="6"
                   orient="auto-start-reverse"
                 >
-                  <path d="M 0 1 L 9 5 L 0 9 z" fill="#475569" />
+                  <path d="M 0 1 L 9 5 L 0 9 z" fill="#171717" />
                 </marker>
                 <marker
                   id="arrow-active"
                   viewBox="0 0 10 10"
-                  refX="18"
+                  refX="20"
                   refY="5"
-                  markerWidth="6"
-                  markerHeight="6"
+                  markerWidth="7"
+                  markerHeight="7"
                   orient="auto-start-reverse"
                 >
-                  <path d="M 0 1 L 9 5 L 0 9 z" fill="#14b8a6" />
+                  <path d="M 0 1 L 9 5 L 0 9 z" fill="#171717" stroke="#F4D63D" strokeWidth="1" />
                 </marker>
               </defs>
 
@@ -502,7 +487,6 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
                   const isConnectedToSelected =
                     selectedNode && (edge.source === selectedNode.id || edge.target === selectedNode.id);
 
-                  // Calculate mid-point for edge label
                   const midX = (sPos.x + tPos.x) / 2;
                   const midY = (sPos.y + tPos.y) / 2;
 
@@ -513,32 +497,32 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
                         y1={sPos.y}
                         x2={tPos.x}
                         y2={tPos.y}
-                        stroke={isConnectedToSelected ? '#14b8a6' : '#334155'}
-                        strokeWidth={isConnectedToSelected ? 2.5 : 1.2}
+                        stroke="#171717"
+                        strokeWidth={isConnectedToSelected ? 3 : 1.8}
                         strokeDasharray={edge.relation_type.includes('audit') ? '4 3' : 'none'}
                         markerEnd={isConnectedToSelected ? 'url(#arrow-active)' : 'url(#arrow-default)'}
                       />
-                      {/* Edge Label pill on hover or connection */}
                       {isConnectedToSelected && (
                         <g transform={`translate(${midX}, ${midY})`}>
                           <rect
-                            x={-40}
-                            y={-9}
-                            width={80}
-                            height={18}
-                            rx={4}
-                            fill="#0f172a"
-                            stroke="#14b8a6"
-                            strokeWidth={0.8}
+                            x={-45}
+                            y={-10}
+                            width={90}
+                            height={20}
+                            rx={3}
+                            fill="#F4D63D"
+                            stroke="#171717"
+                            strokeWidth={1.5}
                           />
                           <text
                             textAnchor="middle"
-                            dy={3.5}
+                            dy={4}
                             fontSize={9}
-                            fill="#94a3b8"
+                            fontWeight="bold"
+                            fill="#171717"
                             className="font-mono select-none"
                           >
-                            {edge.label.length > 14 ? edge.label.substring(0, 12) + '...' : edge.label}
+                            {edge.label.length > 15 ? edge.label.substring(0, 13) + '…' : edge.label}
                           </text>
                         </g>
                       )}
@@ -546,7 +530,7 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
                   );
                 })}
 
-                {/* 2. Draw Nodes */}
+                {/* 2. Draw Neo-Brutalist Rectangular Nodes */}
                 {visibleNodes.map(node => {
                   const pos = nodesPos.get(node.id) || { x: 300, y: 300 };
                   const isSelected = selectedNode?.id === node.id;
@@ -566,69 +550,53 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
                         setDraggedNodeId(node.id);
                       }}
                     >
-                      {/* Pulse circle for selected */}
-                      {isSelected && (
-                        <circle
-                          r={34}
-                          fill="none"
-                          stroke={style.fill}
-                          strokeWidth={2}
-                          strokeDasharray="4 3"
-                          className="animate-spin"
-                          style={{ animationDuration: '8s' }}
-                        />
-                      )}
-
-                      {/* Main Node Body */}
-                      <circle
-                        r={24}
-                        fill={isSelected ? '#0f172a' : '#1e293b'}
-                        stroke={isSelected ? style.fill : '#475569'}
-                        strokeWidth={isSelected ? 3 : 1.5}
-                        className="transition-all hover:stroke-teal-400"
+                      {/* Hard offset shadow rect */}
+                      <rect
+                        x={-42}
+                        y={-22}
+                        width={84}
+                        height={44}
+                        rx={4}
+                        fill="#171717"
+                        transform="translate(3, 3)"
                       />
 
-                      {/* Inner category icon / initial */}
-                      <circle
-                        r={6}
-                        cy={-8}
-                        fill={style.fill}
+                      {/* Main Node Box */}
+                      <rect
+                        x={-42}
+                        y={-22}
+                        width={84}
+                        height={44}
+                        rx={4}
+                        fill={isSelected ? '#F4D63D' : style.fill}
+                        stroke="#171717"
+                        strokeWidth={isSelected ? 3 : 2}
+                        className="transition-colors hover:brightness-105"
                       />
 
-                      {/* Node Text inside / below */}
+                      {/* Node Text inside */}
                       <text
                         textAnchor="middle"
-                        dy={8}
+                        dy={-2}
                         fontSize={10}
                         fontWeight="bold"
-                        fill="#f8fafc"
+                        fill="#171717"
                         className="select-none font-mono tracking-tight"
                       >
-                        {node.id.length > 9 ? node.id.substring(0, 8) + '…' : node.id}
+                        {node.id.length > 10 ? node.id.substring(0, 9) + '…' : node.id}
                       </text>
 
-                      {/* Outer Subtitle Pill */}
-                      <g transform="translate(0, 36)">
-                        <rect
-                          x={-55}
-                          y={-9}
-                          width={110}
-                          height={18}
-                          rx={9}
-                          fill="#090d16"
-                          stroke={isSelected ? style.fill : '#334155'}
-                          strokeWidth={0.8}
-                        />
-                        <text
-                          textAnchor="middle"
-                          dy={3.5}
-                          fontSize={9}
-                          fill={isSelected ? '#f8fafc' : '#94a3b8'}
-                          className="select-none font-medium truncate"
-                        >
-                          {node.title.length > 17 ? node.title.substring(0, 16) + '…' : node.title}
-                        </text>
-                      </g>
+                      {/* Category tag inside */}
+                      <text
+                        textAnchor="middle"
+                        dy={12}
+                        fontSize={8}
+                        fontWeight="bold"
+                        fill="#625F58"
+                        className="select-none font-headline uppercase"
+                      >
+                        {style.label}
+                      </text>
                     </g>
                   );
                 })}
@@ -637,27 +605,27 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
           </div>
         ) : (
           /* Structured Tabular List Mode */
-          <div className="flex-1 overflow-y-auto p-6 space-y-4">
-            <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-              <div className="px-5 py-3 border-b border-slate-800 bg-slate-900/80 flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                  Trace Nodes Tabular Catalog ({visibleNodes.length} Entities)
+          <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-rt-canvas">
+            <div className="bg-white border-3 border-rt-ink rounded-[4px] shadow-brutal overflow-hidden">
+              <div className="px-5 py-3 border-b-2 border-rt-ink bg-rt-primary flex items-center justify-between">
+                <span className="text-xs font-headline font-black text-rt-ink uppercase tracking-wider">
+                  Trace Nodes Catalog ({visibleNodes.length} Entities)
                 </span>
-                <span className="text-xs text-slate-500">Deterministic links from repository files</span>
+                <span className="text-xs font-mono font-bold text-rt-ink">Deterministic Evidence Links</span>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-xs text-left">
-                  <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] font-semibold border-b border-slate-800">
+                <table className="w-full text-xs text-left font-mono">
+                  <thead className="bg-rt-canvas text-rt-ink uppercase text-[10px] font-bold border-b-2 border-rt-ink">
                     <tr>
                       <th className="py-2.5 px-4">Entity ID</th>
                       <th className="py-2.5 px-4">Category</th>
                       <th className="py-2.5 px-4">Title / Name</th>
-                      <th className="py-2.5 px-4">Key Attributes</th>
+                      <th className="py-2.5 px-4">Financial / Key Attributes</th>
                       <th className="py-2.5 px-4">Source Provenance</th>
                       <th className="py-2.5 px-4 text-right">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/60 font-mono">
+                  <tbody className="divide-y divide-rt-muted">
                     {visibleNodes.map(node => {
                       const style = CATEGORY_STYLES[node.category] || CATEGORY_STYLES.road_asset;
                       const isSel = selectedNode?.id === node.id;
@@ -665,40 +633,40 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
                         <tr
                           key={node.id}
                           onClick={() => setSelectedNode(node)}
-                          className={`hover:bg-slate-800/40 cursor-pointer transition ${
-                            isSel ? 'bg-slate-800/60' : ''
+                          className={`hover:bg-yellow-50 cursor-pointer transition ${
+                            isSel ? 'bg-yellow-100 font-bold' : ''
                           }`}
                         >
-                          <td className="py-2.5 px-4 font-bold text-white flex items-center space-x-2">
-                            <span className={`w-2 h-2 rounded-full ${style.dot}`} />
+                          <td className="py-2.5 px-4 font-bold text-rt-ink flex items-center space-x-2">
+                            <span className={`w-2 h-2 rounded-full border border-rt-ink ${style.dot}`} />
                             <span>{node.id}</span>
                           </td>
                           <td className="py-2.5 px-4">
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-sans font-medium border ${style.bg} ${style.border} ${style.text}`}>
+                            <span className={`px-2 py-0.5 rounded-[3px] text-[10px] font-bold border border-rt-ink ${style.bg} ${style.text}`}>
                               {style.label}
                             </span>
                           </td>
-                          <td className="py-2.5 px-4 font-sans text-slate-200">
-                            <div>{node.title}</div>
-                            <div className="text-[11px] text-slate-400">{node.subtitle}</div>
+                          <td className="py-2.5 px-4 font-headline text-rt-ink">
+                            <div className="font-bold">{node.title}</div>
+                            <div className="text-[11px] font-mono text-rt-secondary-text">{node.subtitle}</div>
                           </td>
-                          <td className="py-2.5 px-4 text-slate-300">
-                            {node.data?.cost_inr ? `Recorded Cost: ₹${Number(node.data.cost_inr).toLocaleString('en-IN')}` :
+                          <td className="py-2.5 px-4 text-rt-ink font-financial">
+                            {node.data?.cost_inr ? `Billed: ₹${Number(node.data.cost_inr).toLocaleString('en-IN')}` :
                              node.data?.budget_inr ? `Budget: ₹${Number(node.data.budget_inr).toLocaleString('en-IN')}` :
                              node.data?.category_reported || node.data?.repair_method || '—'}
                           </td>
-                          <td className="py-2.5 px-4 font-sans">
+                          <td className="py-2.5 px-4">
                             <EvidenceBadge provenance={node.provenance} />
                           </td>
-                          <td className="py-2.5 px-4 text-right font-sans">
+                          <td className="py-2.5 px-4 text-right font-headline">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setSelectedNode(node);
                               }}
-                              className="text-teal-400 hover:text-teal-300 text-xs font-medium"
+                              className="text-rt-ink hover:underline text-xs font-bold"
                             >
-                              Inspect Details →
+                              Inspect Docket →
                             </button>
                           </td>
                         </tr>
@@ -711,45 +679,39 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
           </div>
         )}
 
-        {/* Right Slide-over Node Detail Panel */}
+        {/* Right Slide-over Evidence Panel */}
         {selectedNode && (
-          <div className="w-96 bg-slate-900 border-l border-slate-800 flex flex-col z-20 shadow-2xl overflow-y-auto">
+          <div className="w-96 bg-white border-l-3 border-rt-ink flex flex-col z-20 shadow-brutal-xl overflow-y-auto font-body">
             {/* Panel Header */}
-            <div className="p-5 border-b border-slate-800 bg-slate-900/90 relative">
+            <div className="p-5 border-b-2 border-rt-ink bg-rt-primary relative">
               <button
                 onClick={() => setSelectedNode(null)}
-                className="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 text-xs"
+                className="absolute top-4 right-4 p-1 bg-white border-2 border-rt-ink rounded text-rt-ink hover:bg-rt-canvas shadow-brutal-sm text-xs font-bold"
               >
                 ✕
               </button>
 
               <div className="flex items-center space-x-2 mb-2">
-                <span
-                  className={`px-2 py-0.5 rounded text-[11px] font-medium border ${
-                    CATEGORY_STYLES[selectedNode.category]?.bg
-                  } ${CATEGORY_STYLES[selectedNode.category]?.border} ${
-                    CATEGORY_STYLES[selectedNode.category]?.text
-                  }`}
-                >
+                <span className="px-2 py-0.5 rounded-[3px] text-[10px] font-mono font-bold bg-white text-rt-ink border border-rt-ink">
                   {CATEGORY_STYLES[selectedNode.category]?.label || selectedNode.type}
                 </span>
-                <span className="text-xs font-mono text-slate-400">{selectedNode.id}</span>
+                <span className="text-xs font-mono font-bold text-rt-ink">{selectedNode.id}</span>
               </div>
 
-              <h2 className="text-base font-semibold text-white tracking-tight">{selectedNode.title}</h2>
-              <p className="text-xs text-slate-400 mt-0.5">{selectedNode.subtitle}</p>
+              <h2 className="text-lg font-headline font-black text-rt-ink tracking-tight">{selectedNode.title}</h2>
+              <p className="text-xs font-mono text-rt-ink mt-0.5">{selectedNode.subtitle}</p>
 
               <div className="mt-3">
                 <EvidenceBadge provenance={selectedNode.provenance} />
               </div>
             </div>
 
-            {/* Quick Actions Bar */}
-            <div className="p-4 border-b border-slate-800/80 bg-slate-950/50 flex flex-wrap gap-2">
+            {/* Quick Actions */}
+            <div className="p-4 border-b-2 border-rt-ink bg-rt-canvas space-y-2">
               {selectedNode.category === 'road_asset' && (
                 <button
                   onClick={() => onOpenPassport(selectedNode.id)}
-                  className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 bg-teal-600 hover:bg-teal-500 text-white rounded text-xs font-medium transition shadow-sm"
+                  className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 bg-rt-mint hover:bg-teal-200 text-rt-ink border-2 border-rt-ink rounded-[4px] text-xs font-headline font-bold shadow-brutal-sm active:translate-x-[1px] active:translate-y-[1px] transition"
                 >
                   <span>Open Road Passport</span>
                   <ExternalLink className="w-3.5 h-3.5" />
@@ -759,9 +721,9 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
               {selectedNode.category === 'work_order' && (
                 <button
                   onClick={() => onOpenWorkOrder(selectedNode.id)}
-                  className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 bg-amber-600 hover:bg-amber-500 text-white rounded text-xs font-medium transition shadow-sm"
+                  className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 bg-rt-primary hover:bg-yellow-300 text-rt-ink border-2 border-rt-ink rounded-[4px] text-xs font-headline font-bold shadow-brutal-sm active:translate-x-[1px] active:translate-y-[1px] transition"
                 >
-                  <span>Inspect Work Order Evidence</span>
+                  <span>Inspect Work Order Evidence Docket</span>
                   <FileText className="w-3.5 h-3.5" />
                 </button>
               )}
@@ -769,14 +731,13 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
               {selectedNode.category === 'financial' && (
                 <button
                   onClick={() => onNavigateToWard(selectedNode.id)}
-                  className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-xs font-medium transition shadow-sm"
+                  className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 bg-white hover:bg-rt-canvas text-rt-ink border-2 border-rt-ink rounded-[4px] text-xs font-headline font-bold shadow-brutal-sm active:translate-x-[1px] active:translate-y-[1px] transition"
                 >
                   <span>Explore Ward Financial Trail</span>
                   <Building2 className="w-3.5 h-3.5" />
                 </button>
               )}
 
-              {/* Re-center / Pivot Button */}
               <button
                 onClick={() => {
                   if (selectedNode.category === 'road_asset') {
@@ -793,26 +754,26 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
                     setInputVal(selectedNode.id);
                   }
                 }}
-                className="w-full flex items-center justify-center space-x-1.5 py-1.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-xs font-medium border border-slate-700 transition"
+                className="w-full flex items-center justify-center space-x-1.5 py-1.5 px-3 bg-white hover:bg-rt-canvas text-rt-ink rounded-[4px] text-xs font-mono font-bold border border-rt-ink shadow-[1px_1px_0px_#171717] transition"
               >
                 <span>Re-center Graph on this Entity</span>
-                <RotateCcw className="w-3 h-3 text-slate-400" />
+                <RotateCcw className="w-3 h-3 text-rt-ink" />
               </button>
             </div>
 
-            {/* Attributes Section */}
-            <div className="p-5 border-b border-slate-800 space-y-3">
-              <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+            {/* Documented Attributes */}
+            <div className="p-5 border-b-2 border-rt-ink space-y-3 font-mono">
+              <h3 className="text-xs font-headline font-black text-rt-ink uppercase tracking-wider">
                 Documented Attributes
               </h3>
-              <div className="bg-slate-950 rounded-lg border border-slate-800 p-3 space-y-2 text-xs">
+              <div className="bg-rt-canvas rounded-[4px] border-2 border-rt-ink p-3 space-y-2 text-xs">
                 {Object.entries(selectedNode.data || {}).map(([key, val]) => {
                   if (typeof val === 'object' && val !== null) return null;
                   return (
-                    <div key={key} className="flex items-start justify-between gap-2 border-b border-slate-900 pb-1.5 last:border-0 last:pb-0">
-                      <span className="text-slate-400 font-mono text-[11px] capitalize">{key.replace(/_/g, ' ')}:</span>
-                      <span className="text-slate-200 font-mono font-medium text-right text-[11px]">
-                        {typeof val === 'number' && key.includes('cost') || key.includes('budget') || key.includes('inr')
+                    <div key={key} className="flex items-start justify-between gap-2 border-b border-rt-ink/10 pb-1.5 last:border-0 last:pb-0">
+                      <span className="text-rt-secondary-text text-[11px] font-bold uppercase">{key.replace(/_/g, ' ')}:</span>
+                      <span className="text-rt-ink font-bold text-right text-[11px] font-financial">
+                        {typeof val === 'number' && (key.includes('cost') || key.includes('budget') || key.includes('inr'))
                           ? `₹${val.toLocaleString('en-IN')}`
                           : String(val)}
                       </span>
@@ -822,20 +783,19 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
               </div>
             </div>
 
-            {/* Traceability Connections */}
-            <div className="p-5 flex-1 space-y-4">
-              <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center justify-between">
-                <span>Direct Trace Connections</span>
-                <span className="text-[10px] text-slate-500 font-normal">
+            {/* Direct Trace Connections */}
+            <div className="p-5 flex-1 space-y-4 font-mono">
+              <h3 className="text-xs font-headline font-black text-rt-ink uppercase tracking-wider flex items-center justify-between">
+                <span>Trace Connections</span>
+                <span className="text-[10px] text-rt-secondary-text font-normal">
                   {selectedNodeEdges.incoming.length + selectedNodeEdges.outgoing.length} links
                 </span>
               </h3>
 
-              {/* Outgoing relationships */}
               {selectedNodeEdges.outgoing.length > 0 && (
                 <div className="space-y-2">
-                  <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-                    Downstream Links (Funds & Executes):
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-rt-secondary-text">
+                    Downstream (Funds & Executes):
                   </div>
                   {selectedNodeEdges.outgoing.map(edge => (
                     <div
@@ -844,24 +804,23 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
                         const targetNode = graphData?.nodes.find(n => n.id === edge.target);
                         if (targetNode) setSelectedNode(targetNode);
                       }}
-                      className="p-2.5 bg-slate-950 hover:bg-slate-800/70 border border-slate-800 rounded-lg cursor-pointer transition text-xs space-y-1"
+                      className="p-2.5 bg-rt-canvas hover:bg-yellow-100 border-2 border-rt-ink rounded-[4px] cursor-pointer transition text-xs space-y-1 shadow-brutal-sm"
                     >
-                      <div className="flex items-center justify-between font-mono text-[11px]">
-                        <span className="text-teal-400 font-medium">{edge.label}</span>
-                        <ArrowRight className="w-3 h-3 text-slate-500" />
+                      <div className="flex items-center justify-between font-bold text-[11px]">
+                        <span className="text-rt-ink">{edge.label}</span>
+                        <ArrowRight className="w-3 h-3 text-rt-ink" />
                       </div>
-                      <div className="text-slate-300 font-medium">{edge.target}</div>
-                      <div className="text-[11px] text-slate-500">{edge.explanation}</div>
+                      <div className="text-rt-ink font-bold">{edge.target}</div>
+                      <div className="text-[10px] text-rt-secondary-text">{edge.explanation}</div>
                     </div>
                   ))}
                 </div>
               )}
 
-              {/* Incoming relationships */}
               {selectedNodeEdges.incoming.length > 0 && (
                 <div className="space-y-2">
-                  <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-                    Upstream Links (Derives From):
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-rt-secondary-text">
+                    Upstream (Derives From):
                   </div>
                   {selectedNodeEdges.incoming.map(edge => (
                     <div
@@ -870,14 +829,14 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
                         const sourceNode = graphData?.nodes.find(n => n.id === edge.source);
                         if (sourceNode) setSelectedNode(sourceNode);
                       }}
-                      className="p-2.5 bg-slate-950 hover:bg-slate-800/70 border border-slate-800 rounded-lg cursor-pointer transition text-xs space-y-1"
+                      className="p-2.5 bg-rt-canvas hover:bg-yellow-100 border-2 border-rt-ink rounded-[4px] cursor-pointer transition text-xs space-y-1 shadow-brutal-sm"
                     >
-                      <div className="flex items-center justify-between font-mono text-[11px]">
-                        <span className="text-indigo-400 font-medium">{edge.label}</span>
-                        <ArrowRight className="w-3 h-3 text-slate-500" />
+                      <div className="flex items-center justify-between font-bold text-[11px]">
+                        <span className="text-rt-ink">{edge.label}</span>
+                        <ArrowRight className="w-3 h-3 text-rt-ink" />
                       </div>
-                      <div className="text-slate-300 font-medium">{edge.source}</div>
-                      <div className="text-[11px] text-slate-500">{edge.explanation}</div>
+                      <div className="text-rt-ink font-bold">{edge.source}</div>
+                      <div className="text-[10px] text-rt-secondary-text">{edge.explanation}</div>
                     </div>
                   ))}
                 </div>
@@ -885,7 +844,7 @@ export const VisualMoneyTraceGraphView: React.FC<VisualMoneyTraceGraphViewProps>
             </div>
 
             {/* Bottom Disclaimer */}
-            <div className="p-3 bg-slate-950 border-t border-slate-800 text-[10px] text-slate-500 leading-tight">
+            <div className="p-3 bg-rt-muted border-t-2 border-rt-ink text-[10px] font-mono text-rt-secondary-text">
               Synthetic dataset record. Expenditure values represent recorded billed costs, not verified bank payments.
             </div>
           </div>

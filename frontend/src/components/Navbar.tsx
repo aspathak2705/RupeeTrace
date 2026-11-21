@@ -30,25 +30,30 @@ export const Navbar: React.FC<Props> = ({
   wardsList
 }) => {
   return (
-    <header className="sticky top-0 z-40 bg-navy-900/95 backdrop-blur-md border-b border-slate-800">
-      {/* Top Banner */}
+    <header className="sticky top-0 z-40 bg-white border-b-3 border-rt-ink font-body">
+      {/* Top Banner Row */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-4">
           
-          {/* Logo & Tagline */}
-          <div className="flex items-center gap-3 shrink-0 cursor-pointer" onClick={() => setActiveView('money-trail')}>
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-accent-teal to-accent-emerald flex items-center justify-center shadow-lg shadow-accent-teal/20">
-              <span className="text-white font-bold text-lg leading-none">₹</span>
+          {/* Logo & Product Wordmark */}
+          <div
+            className="flex items-center gap-3 shrink-0 cursor-pointer select-none"
+            onClick={() => setActiveView('money-trail')}
+          >
+            <div className="w-9 h-9 bg-rt-primary border-2 border-rt-ink rounded-[4px] shadow-brutal-sm flex items-center justify-center font-headline font-black text-xl text-rt-ink leading-none">
+              ₹
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-lg text-white tracking-tight">RupeeTrace</span>
-                <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-accent-teal/15 text-accent-teal border border-accent-teal/30">
-                  Phase 3 Demo
+                <span className="font-headline font-extrabold text-xl text-rt-ink tracking-tight">
+                  RUPEETRACE<span className="text-xs align-top">®</span>
+                </span>
+                <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded-[3px] bg-rt-primary border border-rt-ink text-rt-ink font-bold shadow-[1px_1px_0px_#171717]">
+                  PUBLIC PROOF
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 hidden sm:block">
-                Follow the Rupee. Verify the Repair. Fund What Matters.
+              <p className="text-[11px] font-mono text-rt-secondary-text hidden sm:block tracking-tight">
+                FOLLOW THE RUPEE. VERIFY THE REPAIR. FUND WHAT MATTERS.
               </p>
             </div>
           </div>
@@ -62,13 +67,13 @@ export const Navbar: React.FC<Props> = ({
               }}
               className="relative"
             >
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-rt-ink absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search Road ID (RD0058), Work Order (WO25-00045), or Locality..."
+                placeholder="Search Road ID (RD0140), Work Order (WO25-00600)..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-navy-950 border border-slate-800 rounded-lg pl-9 pr-4 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-accent-teal/60 transition-colors"
+                className="w-full bg-rt-canvas border-2 border-rt-ink rounded-[4px] pl-9 pr-4 py-1.5 text-xs text-rt-ink placeholder-rt-secondary-text font-mono font-medium focus:outline-none focus:bg-white focus:shadow-brutal-sm transition-all"
               />
             </form>
           </div>
@@ -76,15 +81,15 @@ export const Navbar: React.FC<Props> = ({
           {/* Ward Selector & Role Toggle */}
           <div className="flex items-center gap-3 shrink-0">
             {/* Ward Selector */}
-            <div className="flex items-center gap-1.5 bg-navy-950 px-2.5 py-1 rounded-lg border border-slate-800 text-xs">
-              <span className="text-slate-400 font-medium">Ward:</span>
+            <div className="flex items-center gap-1.5 bg-rt-canvas px-2.5 py-1 rounded-[4px] border-2 border-rt-ink text-xs shadow-brutal-sm">
+              <span className="text-rt-secondary-text font-bold uppercase font-mono text-[10px]">Ward:</span>
               <select
                 value={selectedWard}
                 onChange={(e) => setSelectedWard(e.target.value)}
-                className="bg-transparent text-slate-200 font-mono font-bold focus:outline-none cursor-pointer"
+                className="bg-transparent text-rt-ink font-mono font-bold focus:outline-none cursor-pointer"
               >
                 {wardsList.map(w => (
-                  <option key={w} value={w} className="bg-navy-900 text-slate-200">
+                  <option key={w} value={w} className="bg-white text-rt-ink font-mono">
                     Ward {w}
                   </option>
                 ))}
@@ -92,27 +97,27 @@ export const Navbar: React.FC<Props> = ({
             </div>
 
             {/* Role Switcher */}
-            <div className="flex items-center p-0.5 bg-navy-950 rounded-lg border border-slate-800 text-xs">
+            <div className="flex items-center p-0.5 bg-rt-canvas rounded-[4px] border-2 border-rt-ink text-xs shadow-brutal-sm">
               <button
                 onClick={() => setRole('citizen')}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-md transition-all ${
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-[3px] font-headline font-bold transition-all text-xs ${
                   role === 'citizen'
-                    ? 'bg-accent-teal/20 text-accent-teal font-semibold shadow'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-rt-primary border border-rt-ink text-rt-ink shadow-[1px_1px_0px_#171717]'
+                    : 'text-rt-secondary-text hover:text-rt-ink'
                 }`}
-                title="Citizen View: Anonymized public records, citizen observations, public passports"
+                title="Citizen Mode: Public asset records, community observations, and transparent timelines"
               >
                 <UserCheck className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Citizen</span>
               </button>
               <button
                 onClick={() => setRole('officer')}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-md transition-all ${
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-[3px] font-headline font-bold transition-all text-xs ${
                   role === 'officer'
-                    ? 'bg-accent-emerald/20 text-accent-emerald font-semibold shadow'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-rt-mint border border-rt-ink text-rt-ink shadow-[1px_1px_0px_#171717]'
+                    : 'text-rt-secondary-text hover:text-rt-ink'
                 }`}
-                title="Municipal Officer View: Audit investigation, contractor oversight, response dispatch"
+                title="Ward Officer Mode: Administrative audit review, technical clarifications, remedial notices"
               >
                 <ShieldCheck className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Officer</span>
@@ -121,93 +126,40 @@ export const Navbar: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* Navigation Tabs */}
-        <nav className="flex items-center space-x-1 overflow-x-auto py-2 border-t border-slate-800/80 no-scrollbar text-xs">
-          <button
-            onClick={() => setActiveView('money-trail')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
-              activeView === 'money-trail'
-                ? 'bg-navy-800 text-accent-teal font-semibold border border-slate-700'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-navy-850'
-            }`}
-          >
-            <TrendingUp className="w-3.5 h-3.5" />
-            Ward Money Trail
-          </button>
+        {/* Navigation Tabs Bar */}
+        <nav className="flex items-center space-x-1.5 overflow-x-auto py-2.5 border-t-2 border-rt-ink/20 no-scrollbar text-xs font-headline">
+          {[
+            { id: 'money-trail', label: 'Ward Money Trail', icon: TrendingUp },
+            { id: 'passport', label: 'Road Passport', icon: Compass, badge: 'SIGNATURE', badgeColor: 'bg-rt-primary' },
+            { id: 'graph', label: 'Visual Money Trace Graph', icon: GitBranch, badge: 'SIGNATURE', badgeColor: 'bg-rt-mint' },
+            { id: 'audits', label: 'Repair Auditor', icon: ShieldAlert },
+            { id: 'contractors', label: 'Contractor Scorecards', icon: Users },
+            { id: 'next-rupee', label: 'Next Rupee Planner', icon: Award },
+            { id: 'cases', label: 'Cases & Observations', icon: MessageSquare }
+          ].map(tab => {
+            const Icon = tab.icon;
+            const isActive = activeView === tab.id;
 
-          <button
-            onClick={() => setActiveView('passport')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
-              activeView === 'passport'
-                ? 'bg-navy-800 text-accent-teal font-semibold border border-slate-700'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-navy-850'
-            }`}
-          >
-            <Compass className="w-3.5 h-3.5 text-accent-emerald" />
-            Road Passport
-            <span className="text-[10px] px-1 py-0.2 rounded bg-accent-emerald/15 text-accent-emerald ml-0.5">Signature</span>
-          </button>
-
-          <button
-            onClick={() => setActiveView('graph')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
-              activeView === 'graph'
-                ? 'bg-navy-800 text-accent-teal font-semibold border border-slate-700'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-navy-850'
-            }`}
-          >
-            <GitBranch className="w-3.5 h-3.5 text-accent-teal" />
-            Visual Money Trace Graph
-            <span className="text-[10px] px-1 py-0.2 rounded bg-accent-teal/15 text-accent-teal ml-0.5">Signature</span>
-          </button>
-
-          <button
-            onClick={() => setActiveView('audits')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
-              activeView === 'audits'
-                ? 'bg-navy-800 text-accent-teal font-semibold border border-slate-700'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-navy-850'
-            }`}
-          >
-            <ShieldAlert className="w-3.5 h-3.5 text-accent-rose" />
-            Repair Auditor
-          </button>
-
-          <button
-            onClick={() => setActiveView('contractors')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
-              activeView === 'contractors'
-                ? 'bg-navy-800 text-accent-teal font-semibold border border-slate-700'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-navy-850'
-            }`}
-          >
-            <Users className="w-3.5 h-3.5" />
-            Contractor Scorecards
-          </button>
-
-          <button
-            onClick={() => setActiveView('next-rupee')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
-              activeView === 'next-rupee'
-                ? 'bg-navy-800 text-accent-teal font-semibold border border-slate-700'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-navy-850'
-            }`}
-          >
-            <Award className="w-3.5 h-3.5 text-accent-amber" />
-            Next Rupee Planner
-          </button>
-
-          <button
-            onClick={() => setActiveView('cases')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
-              activeView === 'cases'
-                ? 'bg-navy-800 text-accent-teal font-semibold border border-slate-700'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-navy-850'
-            }`}
-          >
-            <MessageSquare className="w-3.5 h-3.5" />
-            Cases & Observations
-          </button>
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveView(tab.id)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] whitespace-nowrap transition-all font-bold ${
+                  isActive
+                    ? 'bg-rt-primary text-rt-ink border-2 border-rt-ink shadow-brutal-sm'
+                    : 'bg-white hover:bg-rt-canvas text-rt-ink border border-rt-ink/40 hover:border-rt-ink'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                <span>{tab.label}</span>
+                {tab.badge && (
+                  <span className={`text-[9px] font-mono px-1 py-0.2 rounded-[2px] border border-rt-ink ${tab.badgeColor} text-rt-ink ml-0.5`}>
+                    {tab.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </nav>
       </div>
     </header>

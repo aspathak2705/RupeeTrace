@@ -17,12 +17,12 @@ export const EvidenceBadge: React.FC<Props> = ({ provenance, sourceFile, recordI
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-mono bg-navy-850 border border-slate-700/60 text-slate-300 ${className}`}
-      title={`Raw Provenance: ${file} (ID: ${id})`}
+      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[3px] text-[11px] font-mono bg-white border border-rt-ink text-rt-ink shadow-[1.5px_1.5px_0px_#171717] ${className}`}
+      title={`Raw Verified Dataset Record: ${file} (ID: ${id})`}
     >
-      <Database className="w-3 h-3 text-accent-teal shrink-0" />
-      <span className="text-slate-400">{file}:</span>
-      <span className="font-semibold text-slate-200">{id}</span>
+      <Database className="w-3 h-3 text-rt-ink shrink-0" />
+      <span className="text-rt-secondary-text">{file}:</span>
+      <span className="font-bold text-rt-ink">{id}</span>
     </span>
   );
 };

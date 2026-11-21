@@ -137,12 +137,12 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-teal-500/30">
+    <div className="min-h-screen bg-rt-canvas text-rt-ink flex flex-col font-body selection:bg-rt-primary selection:text-rt-ink">
       {/* Top Banner: Synthetic Data Notice */}
-      <div className="bg-slate-900 border-b border-slate-800 text-[11px] text-slate-400 py-1 px-4 text-center flex items-center justify-center space-x-2">
-        <span className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
+      <div className="bg-rt-ink text-white border-b-2 border-rt-ink text-[11px] font-mono py-1 px-4 text-center flex items-center justify-center space-x-2">
+        <span className="w-2 h-2 rounded-full bg-rt-primary animate-pulse" />
         <span>
-          <strong>RupeeTrace Research Prototype:</strong> All civic records synthetic. Billed expenditures represent recorded work-order figures, not verified treasury disbursements.
+          <strong>RUPEETRACE PROTOTYPE:</strong> Synthetic civic research records. Billed expenditures represent recorded work-order figures, not verified treasury disbursements.
         </span>
       </div>
 
@@ -250,10 +250,12 @@ export const App: React.FC = () => {
       {/* Floating AI Assistant Trigger (Bottom-Right) */}
       <button
         onClick={() => setShowAssistant(true)}
-        className="fixed bottom-6 right-6 p-3.5 bg-gradient-to-tr from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white rounded-full shadow-2xl z-40 transition-transform hover:scale-105 flex items-center space-x-2 border border-teal-400/30"
+        className="fixed bottom-6 right-6 px-4 py-3 bg-rt-primary hover:bg-yellow-300 text-rt-ink border-3 border-rt-ink rounded-[6px] shadow-brutal-lg z-40 transition-transform active:translate-x-[2px] active:translate-y-[2px] font-headline font-black text-xs flex items-center space-x-2"
         title="Open RupeeTrace Multilingual AI Assistant"
       >
-        <span className="font-bold text-xs">₹ AI Assistant</span>
+        <span className="w-5 h-5 bg-white border border-rt-ink rounded-full flex items-center justify-center font-black text-xs">₹</span>
+        <span>AI ASSISTANT</span>
+        <span className="text-[10px] bg-white px-1 py-0.2 rounded border border-rt-ink font-mono font-bold">हि/म/EN</span>
       </button>
 
       {/* Global Work Order Evidence Modal */}
